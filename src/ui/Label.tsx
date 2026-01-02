@@ -12,7 +12,7 @@ const sizeMap = {
 export function Label({ text, size = "md", className = "" }: LabelProps) {
   return (
     <div
-      className={`text-center uppercase tracking-[0.28em] text-zinc-400 ${sizeMap[size]} ${className}`}
+      className={`text-center uppercase tracking-[0.28em] text-zinc-400 px-[var(--ui-space-2)] ${sizeMap[size]} ${className}`}
     >
       {text}
     </div>

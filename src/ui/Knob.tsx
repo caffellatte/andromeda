@@ -9,7 +9,7 @@ type KnobProps = {
   min?: number;
   max?: number;
   step?: number;
-  size?: number;
+  size?: number | string;
   label?: string;
   unit?: string;
   precision?: number;
@@ -44,7 +44,7 @@ export function Knob({
   min = 0,
   max = 1,
   step = 0.01,
-  size = 72,
+  size = "var(--ui-size-3)",
   label,
   unit,
   precision,
@@ -140,15 +140,22 @@ export function Knob({
         className="group relative grid place-items-center rounded-full border border-white/10 bg-zinc-900/80 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),_0_8px_20px_-12px_rgba(0,0,0,0.9)] outline-none transition focus-visible:ring-2 focus-visible:ring-amber-300/70"
         style={{ width: size, height: size }}
       >
-        <div className="absolute inset-2 rounded-full bg-zinc-950/70" />
+        <div className="absolute inset-[var(--ui-space-2)] rounded-full bg-zinc-950/70" />
         <div
           className="absolute left-1/2 top-1/2 h-[38%] w-[2px] -translate-x-1/2 -translate-y-[85%] rounded-full bg-amber-200 shadow-[0_0_10px_rgba(252,211,77,0.65)] transition-transform"
           style={{ transform: `rotate(${angle}deg)` }}
         />
-        <div className="absolute inset-3 rounded-full border border-white/10 bg-zinc-900/80" />
+        <div className="absolute inset-[var(--ui-space-3)] rounded-full border border-white/10 bg-zinc-900/80" />
       </div>
-      {label ? <Label text={label} className="mt-3" /> : null}
-      <Display value={displayValue} unit={unit} size="sm" />
+      {label ? (
+        <Label text={label} className="mt-[var(--ui-space-3)]" />
+      ) : null}
+      <Display
+        value={displayValue}
+        unit={unit}
+        size="sm"
+        className="mt-[var(--ui-space-1)]"
+      />
     </div>
   );
 }

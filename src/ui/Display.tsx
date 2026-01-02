@@ -18,7 +18,7 @@ export function Display({
 }: DisplayProps) {
   return (
     <div
-      className={`text-center font-mono text-amber-200/90 ${sizeMap[size]} ${className}`}
+      className={`text-center font-mono text-amber-200/90 px-[var(--ui-space-2)] ${sizeMap[size]} ${className}`}
     >
       {value}
       {unit ? ` ${unit}` : ""}
