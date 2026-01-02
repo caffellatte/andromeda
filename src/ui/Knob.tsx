@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import type { KeyboardEvent, PointerEvent } from "react";
 
 type KnobProps = {
   value?: number;
@@ -78,26 +79,26 @@ export function Knob({
     emitChange(stepped);
   };
 
-  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { startY: event.clientY, startValue: currentValue };
   };
 
-  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current) return;
     const delta = dragRef.current.startY - event.clientY;
     const sensitivity = safeRange / 150;
     updateValue(dragRef.current.startValue + delta * sensitivity);
   };
 
-  const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current) return;
     event.currentTarget.releasePointerCapture(event.pointerId);
     dragRef.current = null;
     onChangeEnd?.(currentValue);
   };
 
-  const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     let delta = 0;
     if (event.key === "ArrowUp" || event.key === "ArrowRight") delta = step;
     if (event.key === "ArrowDown" || event.key === "ArrowLeft") delta = -step;
