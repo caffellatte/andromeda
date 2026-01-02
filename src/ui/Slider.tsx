@@ -12,6 +12,8 @@ type SliderProps = {
   width?: number | string;
   height?: number | string;
   orientation?: "horizontal" | "vertical";
+  trackHeight?: number | string;
+  thumbSize?: number | string;
   label?: string;
   unit?: string;
   precision?: number;
@@ -48,6 +50,8 @@ export function Slider({
   width = "14rem",
   height = "10rem",
   orientation = "horizontal",
+  trackHeight = "var(--ui-space-1)",
+  thumbSize = "var(--ui-space-4)",
   label,
   unit,
   precision,
@@ -162,26 +166,40 @@ export function Slider({
       >
         {orientation === "vertical" ? (
           <>
-            <div className="absolute top-0 bottom-0 left-1/2 w-[var(--ui-space-1)] -translate-x-1/2 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]" />
             <div
-              className="absolute bottom-0 left-1/2 w-[var(--ui-space-1)] -translate-x-1/2 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
-              style={{ height: `${normalized * 100}%` }}
+              className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"
+              style={{ width: trackHeight }}
             />
             <div
-              className="absolute left-1/2 h-[var(--ui-space-4)] w-[var(--ui-space-4)] -translate-x-1/2 translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
-              style={{ bottom: `${normalized * 100}%` }}
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
+              style={{ height: `${normalized * 100}%`, width: trackHeight }}
+            />
+            <div
+              className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
+              style={{
+                bottom: `${normalized * 100}%`,
+                width: thumbSize,
+                height: thumbSize,
+              }}
             />
           </>
         ) : (
           <>
-            <div className="absolute left-0 right-0 h-[var(--ui-space-1)] rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]" />
             <div
-              className="absolute left-0 h-[var(--ui-space-1)] rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
-              style={{ width: `${normalized * 100}%` }}
+              className="absolute left-0 right-0 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"
+              style={{ height: trackHeight }}
             />
             <div
-              className="absolute top-1/2 h-[var(--ui-space-4)] w-[var(--ui-space-4)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
-              style={{ left: `${normalized * 100}%` }}
+              className="absolute left-0 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
+              style={{ width: `${normalized * 100}%`, height: trackHeight }}
+            />
+            <div
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
+              style={{
+                left: `${normalized * 100}%`,
+                width: thumbSize,
+                height: thumbSize,
+              }}
             />
           </>
         )}
