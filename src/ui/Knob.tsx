@@ -13,6 +13,7 @@ type KnobProps = {
   label?: string;
   unit?: string;
   precision?: number;
+  indicatorOffset?: number;
   onChange?: (value: number) => void;
   onChangeEnd?: (value: number) => void;
   className?: string;
@@ -48,6 +49,7 @@ export function Knob({
   label,
   unit,
   precision,
+  indicatorOffset = 0,
   onChange,
   onChangeEnd,
   className = "",
@@ -124,6 +126,8 @@ export function Knob({
 
   const displayValue = currentValue.toFixed(effectivePrecision);
 
+  const indicatorTranslate = -85 + indicatorOffset;
+
   return (
     <div className={`select-none ${className}`}>
       <div
@@ -142,8 +146,10 @@ export function Knob({
       >
         <div className="absolute inset-[var(--ui-space-2)] rounded-full bg-zinc-950/70" />
         <div
-          className="absolute left-1/2 top-1/2 h-[38%] w-[2px] -translate-x-1/2 -translate-y-[85%] rounded-full bg-amber-200 shadow-[0_0_10px_rgba(252,211,77,0.65)] transition-transform"
-          style={{ transform: `rotate(${angle}deg)` }}
+          className="absolute left-1/2 top-1/2 h-[38%] w-[2px] rounded-full bg-amber-200 shadow-[0_0_10px_rgba(252,211,77,0.65)] transition-transform"
+          style={{
+            transform: `translate(-50%, ${indicatorTranslate}%) rotate(${angle}deg)`,
+          }}
         />
         <div className="absolute inset-[var(--ui-space-3)] rounded-full border border-white/10 bg-zinc-900/80" />
       </div>
