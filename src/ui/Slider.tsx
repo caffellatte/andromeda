@@ -10,6 +10,8 @@ type SliderProps = {
   max?: number;
   step?: number;
   width?: number | string;
+  height?: number | string;
+  orientation?: "horizontal" | "vertical";
   label?: string;
   unit?: string;
   precision?: number;
@@ -44,6 +46,8 @@ export function Slider({
   max = 1,
   step = 0.01,
   width = "14rem",
+  height = "10rem",
+  orientation = "horizontal",
   label,
   unit,
   precision,
@@ -79,23 +83,29 @@ export function Slider({
     emitChange(stepped);
   };
 
-  const updateFromClientX = (clientX: number) => {
+  const updateFromPointer = (clientX: number, clientY: number) => {
     const rect = dragRef.current?.rect;
     if (!rect) return;
-    const x = clamp(clientX - rect.left, 0, rect.width);
-    const ratio = rect.width > 0 ? x / rect.width : 0;
+    let ratio = 0;
+    if (orientation === "vertical") {
+      const y = clamp(clientY - rect.top, 0, rect.height);
+      ratio = rect.height > 0 ? 1 - y / rect.height : 0;
+    } else {
+      const x = clamp(clientX - rect.left, 0, rect.width);
+      ratio = rect.width > 0 ? x / rect.width : 0;
+    }
     updateValue(min + ratio * safeRange);
   };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { rect: event.currentTarget.getBoundingClientRect() };
-    updateFromClientX(event.clientX);
+    updateFromPointer(event.clientX, event.clientY);
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current) return;
-    updateFromClientX(event.clientX);
+    updateFromPointer(event.clientX, event.clientY);
   };
 
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
@@ -138,22 +148,43 @@ export function Slider({
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={Number(currentValue.toFixed(effectivePrecision))}
+        aria-orientation={orientation}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onKeyDown={onKeyDown}
-        className="group relative flex items-center outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
-        style={{ width, height: "var(--ui-space-6)" }}
+        className="group relative flex outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
+        style={{
+          width: orientation === "vertical" ? "var(--ui-space-6)" : width,
+          height: orientation === "vertical" ? height : "var(--ui-space-6)",
+          alignItems: orientation === "vertical" ? "stretch" : "center",
+        }}
       >
-        <div className="absolute left-0 right-0 h-[var(--ui-space-1)] rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]" />
-        <div
-          className="absolute left-0 h-[var(--ui-space-1)] rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
-          style={{ width: `${normalized * 100}%` }}
-        />
-        <div
-          className="absolute top-1/2 h-[var(--ui-space-4)] w-[var(--ui-space-4)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
-          style={{ left: `${normalized * 100}%` }}
-        />
+        {orientation === "vertical" ? (
+          <>
+            <div className="absolute top-0 bottom-0 left-1/2 w-[var(--ui-space-1)] -translate-x-1/2 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]" />
+            <div
+              className="absolute bottom-0 left-1/2 w-[var(--ui-space-1)] -translate-x-1/2 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
+              style={{ height: `${normalized * 100}%` }}
+            />
+            <div
+              className="absolute left-1/2 h-[var(--ui-space-4)] w-[var(--ui-space-4)] -translate-x-1/2 translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
+              style={{ bottom: `${normalized * 100}%` }}
+            />
+          </>
+        ) : (
+          <>
+            <div className="absolute left-0 right-0 h-[var(--ui-space-1)] rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]" />
+            <div
+              className="absolute left-0 h-[var(--ui-space-1)] rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
+              style={{ width: `${normalized * 100}%` }}
+            />
+            <div
+              className="absolute top-1/2 h-[var(--ui-space-4)] w-[var(--ui-space-4)] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
+              style={{ left: `${normalized * 100}%` }}
+            />
+          </>
+        )}
       </div>
       {label ? (
         <Label text={label} className="mt-[var(--ui-space-3)]" />
