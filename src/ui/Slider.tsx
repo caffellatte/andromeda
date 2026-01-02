@@ -12,8 +12,9 @@ type SliderProps = {
   width?: number | string;
   height?: number | string;
   orientation?: "horizontal" | "vertical";
-  trackHeight?: number | string;
-  thumbSize?: number | string;
+  thickness?: number | string | "sm" | "md" | "lg";
+  trackHeight?: number | string | "sm" | "md" | "lg";
+  thumbSize?: number | string | "sm" | "md" | "lg";
   label?: string;
   unit?: string;
   precision?: number;
@@ -41,6 +42,16 @@ const getPrecision = (step: number) => {
   return Math.min(6, stepText.split(".")[1]?.length ?? 0);
 };
 
+const resolvePreset = (
+  value: number | string | "sm" | "md" | "lg",
+  map: Record<"sm" | "md" | "lg", string>,
+) => {
+  if (value === "sm" || value === "md" || value === "lg") {
+    return map[value];
+  }
+  return value;
+};
+
 export function Slider({
   value,
   defaultValue,
@@ -50,8 +61,9 @@ export function Slider({
   width = "14rem",
   height = "10rem",
   orientation = "horizontal",
-  trackHeight = "var(--ui-space-1)",
-  thumbSize = "var(--ui-space-4)",
+  thickness = "md",
+  trackHeight = "md",
+  thumbSize = "md",
   label,
   unit,
   precision,
@@ -68,6 +80,21 @@ export function Slider({
 
   const safeRange = Math.max(max - min, Number.EPSILON);
   const normalized = clamp((currentValue - min) / safeRange, 0, 1);
+  const resolvedThickness = resolvePreset(thickness, {
+    sm: "var(--ui-thickness-sm)",
+    md: "var(--ui-thickness-md)",
+    lg: "var(--ui-thickness-lg)",
+  });
+  const resolvedTrackHeight = resolvePreset(trackHeight, {
+    sm: "var(--ui-track-sm)",
+    md: "var(--ui-track-md)",
+    lg: "var(--ui-track-lg)",
+  });
+  const resolvedThumbSize = resolvePreset(thumbSize, {
+    sm: "var(--ui-thumb-sm)",
+    md: "var(--ui-thumb-md)",
+    lg: "var(--ui-thumb-lg)",
+  });
 
   const effectivePrecision = useMemo(() => {
     if (precision !== undefined) return precision;
@@ -159,8 +186,8 @@ export function Slider({
         onKeyDown={onKeyDown}
         className="group relative flex outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
         style={{
-          width: orientation === "vertical" ? "var(--ui-space-6)" : width,
-          height: orientation === "vertical" ? height : "var(--ui-space-6)",
+          width: orientation === "vertical" ? resolvedThickness : width,
+          height: orientation === "vertical" ? height : resolvedThickness,
           alignItems: orientation === "vertical" ? "stretch" : "center",
         }}
       >
@@ -168,18 +195,21 @@ export function Slider({
           <>
             <div
               className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"
-              style={{ width: trackHeight }}
+              style={{ width: resolvedTrackHeight }}
             />
             <div
               className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
-              style={{ height: `${normalized * 100}%`, width: trackHeight }}
+              style={{
+                height: `${normalized * 100}%`,
+                width: resolvedTrackHeight,
+              }}
             />
             <div
               className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
               style={{
                 bottom: `${normalized * 100}%`,
-                width: thumbSize,
-                height: thumbSize,
+                width: resolvedThumbSize,
+                height: resolvedThumbSize,
               }}
             />
           </>
@@ -187,18 +217,21 @@ export function Slider({
           <>
             <div
               className="absolute left-0 right-0 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"
-              style={{ height: trackHeight }}
+              style={{ height: resolvedTrackHeight }}
             />
             <div
               className="absolute left-0 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
-              style={{ width: `${normalized * 100}%`, height: trackHeight }}
+              style={{
+                width: `${normalized * 100}%`,
+                height: resolvedTrackHeight,
+              }}
             />
             <div
               className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
               style={{
                 left: `${normalized * 100}%`,
-                width: thumbSize,
-                height: thumbSize,
+                width: resolvedThumbSize,
+                height: resolvedThumbSize,
               }}
             />
           </>

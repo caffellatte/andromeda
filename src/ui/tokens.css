@@ -13,6 +13,15 @@
   --ui-size-1: 2rem;
   --ui-size-2: 3rem;
   --ui-size-3: 4.5rem;
+  --ui-thickness-sm: 1.5rem;
+  --ui-thickness-md: 2rem;
+  --ui-thickness-lg: 2.5rem;
+  --ui-track-sm: 0.2rem;
+  --ui-track-md: 0.25rem;
+  --ui-track-lg: 0.35rem;
+  --ui-thumb-sm: 0.75rem;
+  --ui-thumb-md: 1rem;
+  --ui-thumb-lg: 1.25rem;
 
   /* Typography */
   --ui-font-1: 0.6rem;
