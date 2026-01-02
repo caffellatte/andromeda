@@ -1,5 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
+import { Display } from "./Display";
+import { Label } from "./Label";
 
 type KnobProps = {
   value?: number;
@@ -145,13 +147,8 @@ export function Knob({
         />
         <div className="absolute inset-3 rounded-full border border-white/10 bg-zinc-900/80" />
       </div>
-      <div className="mt-3 text-center text-xs uppercase tracking-[0.2em] text-zinc-400">
-        {label}
-      </div>
-      <div className="text-center text-xs text-amber-200/90">
-        {displayValue}
-        {unit ? ` ${unit}` : ""}
-      </div>
+      {label ? <Label text={label} className="mt-3" /> : null}
+      <Display value={displayValue} unit={unit} size="sm" />
     </div>
   );
 }
