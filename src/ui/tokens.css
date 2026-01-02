@@ -1,0 +1,24 @@
+/* Andromeda UI tokens */
+:root {
+  /* Spacing + layout */
+  --ui-space-1: 0.25rem;
+  --ui-space-2: 0.5rem;
+  --ui-space-3: 0.75rem;
+  --ui-space-4: 1rem;
+  --ui-space-5: 1.5rem;
+  --ui-space-6: 2rem;
+  --ui-radius-1: 0.375rem;
+  --ui-radius-2: 0.75rem;
+  --ui-radius-3: 1.5rem;
+  --ui-size-1: 2rem;
+  --ui-size-2: 3rem;
+  --ui-size-3: 4.5rem;
+
+  /* Typography */
+  --ui-font-1: 0.6rem;
+  --ui-font-2: 0.7rem;
+  --ui-font-3: 0.75rem;
+  --ui-font-4: 0.875rem;
+  --ui-letter-1: 0.2em;
+  --ui-letter-2: 0.28em;
+}
