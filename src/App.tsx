@@ -1,7 +1,6 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
-import { Knob } from "./ui";
+import { Knob, Slider } from "./ui";
 import "./App.css";
 
 function App() {
@@ -23,6 +22,9 @@ function App() {
         unit="Hz"
         defaultValue={440}
       />
+      <Slider thickness="lg" trackHeight="sm" thumbSize="lg" label="Mix" />
+
+      <Slider orientation="vertical" height="12rem" thickness="sm" />
 
       <form
         className="row"
