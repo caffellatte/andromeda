@@ -6,8 +6,8 @@ type DisplayProps = {
 };
 
 const sizeMap = {
-  sm: "text-xs",
-  md: "text-sm",
+  sm: "text-[var(--ui-font-3)]",
+  md: "text-[var(--ui-font-4)]",
 };
 
 export function Display({
