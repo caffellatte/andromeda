@@ -3,3 +3,4 @@ export { Display } from "./Display";
 export { Label } from "./Label";
 export { Slider } from "./Slider";
 export { Toggle } from "./Toggle";
+export { disabledTextClass } from "./utils";

@@ -30,4 +30,6 @@
   --ui-font-4: 0.875rem;
   --ui-letter-1: 0.2em;
   --ui-letter-2: 0.28em;
+  --ui-disabled-bg: rgba(39, 39, 42, 0.8);
+  --ui-disabled-fg: rgba(161, 161, 170, 0.7);
 }

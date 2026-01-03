@@ -65,7 +65,7 @@ export function Toggle({
         onClick={handleToggle}
         className={`relative inline-flex items-center rounded-full border border-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70 ${
           disabled
-            ? "cursor-not-allowed bg-zinc-800/80 opacity-60"
+            ? "cursor-not-allowed bg-[var(--ui-disabled-bg)] opacity-60"
             : "cursor-pointer bg-zinc-900/80"
         }`}
         style={{ width: trackWidth, height: trackHeight }}
@@ -73,7 +73,7 @@ export function Toggle({
         <span
           className={`absolute left-[var(--ui-space-1)] top-1/2 -translate-y-1/2 rounded-full border border-white/10 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)] transition ${
             disabled
-              ? "bg-zinc-600"
+              ? "bg-[var(--ui-disabled-fg)]"
               : isOn
                 ? "translate-x-full bg-amber-200"
                 : "bg-zinc-700"
@@ -93,12 +93,7 @@ export function Toggle({
         />
       </button>
       {label ? (
-        <Label
-          text={label}
-          className={`mt-[var(--ui-space-3)] ${
-            disabled ? "opacity-60" : ""
-          }`}
-        />
+        <Label text={label} disabled={disabled} className="mt-[var(--ui-space-3)]" />
       ) : null}
     </div>
   );
