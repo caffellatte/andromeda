@@ -92,7 +92,7 @@ export function Toggle({
           }`}
         />
       </button>
-      {disabled ? <DisabledTooltip /> : null}
+      {disabled ? <DisabledTooltip text="Disabled" /> : null}
       {label ? (
         <Label text={label} disabled={disabled} className="mt-[var(--ui-space-3)]" />
       ) : null}

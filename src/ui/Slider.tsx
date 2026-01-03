@@ -265,7 +265,7 @@ export function Slider({
           </>
         )}
       </div>
-      {disabled ? <DisabledTooltip /> : null}
+      {disabled ? <DisabledTooltip text="Disabled" /> : null}
       {label ? (
         <Label
           text={label}
