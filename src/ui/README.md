@@ -40,3 +40,4 @@ import { Knob, Slider } from "../ui";
 | --- | --- | --- |
 | Knob | `value`, `defaultValue`, `min`, `max`, `step`, `size`, `label`, `unit`, `precision`, `onChange`, `onChangeEnd`, `className` | `min/max` default `0/1`; `step` default `0.01`; `size` default `var(--ui-size-3)` |
 | Slider | `value`, `defaultValue`, `min`, `max`, `step`, `width`, `height`, `orientation`, `thickness`, `trackHeight`, `thumbSize`, `label`, `unit`, `precision`, `onChange`, `onChangeEnd`, `className` | `min/max` default `0/1`; `step` default `0.01`; `orientation` default `horizontal`; `height` used for vertical; `thickness` uses `--ui-thickness-*`; `trackHeight` uses `--ui-track-*`; `thumbSize` uses `--ui-thumb-*` |
+| Toggle | `checked`, `defaultChecked`, `size`, `label`, `disabled`, `onChange`, `className` | `size` defaults to `md`; supports controlled/uncontrolled usage |
