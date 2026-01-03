@@ -38,5 +38,6 @@ import { Knob, Slider } from "../ui";
 ## Props reference
 | Component | Props | Notes |
 | --- | --- | --- |
-| Knob | `value`, `defaultValue`, `min`, `max`, `step`, `size`, `label`, `unit`, `precision`, `onChange`, `onChangeEnd`, `className` | `min/max` default `0/1`; `step` default `0.01`; `size` default `var(--ui-size-3)` |
-| Slider | `value`, `defaultValue`, `min`, `max`, `step`, `width`, `height`, `orientation`, `thickness`, `trackHeight`, `thumbSize`, `label`, `unit`, `precision`, `onChange`, `onChangeEnd`, `className` | `min/max` default `0/1`; `step` default `0.01`; `orientation` default `horizontal`; `height` used for vertical; `thickness` uses `--ui-thickness-*`; `trackHeight` uses `--ui-track-*`; `thumbSize` uses `--ui-thumb-*` |
+| Knob | `value`, `defaultValue`, `min`, `max`, `step`, `size`, `label`, `unit`, `precision`, `indicatorOffset`, `disabled`, `tooltipText`, `onChange`, `onChangeEnd`, `className` | `min/max` default `0/1`; `step` default `0.01`; `size` default `var(--ui-size-3)` |
+| Slider | `value`, `defaultValue`, `min`, `max`, `step`, `width`, `height`, `orientation`, `thickness`, `trackHeight`, `thumbSize`, `label`, `unit`, `precision`, `disabled`, `tooltipText`, `onChange`, `onChangeEnd`, `className` | `min/max` default `0/1`; `step` default `0.01`; `orientation` default `horizontal`; `height` used for vertical; `thickness` uses `--ui-thickness-*`; `trackHeight` uses `--ui-track-*`; `thumbSize` uses `--ui-thumb-*` |
+| Toggle | `checked`, `defaultChecked`, `size`, `label`, `disabled`, `tooltipText`, `onChange`, `className` | `size` defaults to `md`; supports controlled/uncontrolled usage |

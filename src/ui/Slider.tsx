@@ -1,7 +1,9 @@
 import { useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
 import { Display } from "./Display";
+import { DisabledTooltip } from "./DisabledTooltip";
 import { Label } from "./Label";
+import { disabledSurfaceClass } from "./utils";
 
 type SliderProps = {
   value?: number;
@@ -18,6 +20,8 @@ type SliderProps = {
   label?: string;
   unit?: string;
   precision?: number;
+  disabled?: boolean;
+  tooltipText?: string;
   onChange?: (value: number) => void;
   onChangeEnd?: (value: number) => void;
   className?: string;
@@ -67,6 +71,8 @@ export function Slider({
   label,
   unit,
   precision,
+  disabled = false,
+  tooltipText = "Disabled",
   onChange,
   onChangeEnd,
   className = "",
@@ -115,6 +121,7 @@ export function Slider({
   };
 
   const updateFromPointer = (clientX: number, clientY: number) => {
+    if (disabled) return;
     const rect = dragRef.current?.rect;
     if (!rect) return;
     let ratio = 0;
@@ -129,17 +136,20 @@ export function Slider({
   };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (disabled) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     dragRef.current = { rect: event.currentTarget.getBoundingClientRect() };
     updateFromPointer(event.clientX, event.clientY);
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (disabled) return;
     if (!dragRef.current) return;
     updateFromPointer(event.clientX, event.clientY);
   };
 
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    if (disabled) return;
     if (!dragRef.current) return;
     event.currentTarget.releasePointerCapture(event.pointerId);
     dragRef.current = null;
@@ -147,6 +157,7 @@ export function Slider({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (disabled) return;
     let delta = 0;
     if (event.key === "ArrowRight" || event.key === "ArrowUp") delta = step;
     if (event.key === "ArrowLeft" || event.key === "ArrowDown") delta = -step;
@@ -171,20 +182,23 @@ export function Slider({
   const displayValue = currentValue.toFixed(effectivePrecision);
 
   return (
-    <div className={`select-none ${className}`}>
+    <div className={`group relative select-none ${className}`}>
       <div
         role="slider"
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         aria-label={label ?? "Slider"}
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={Number(currentValue.toFixed(effectivePrecision))}
         aria-orientation={orientation}
+        aria-disabled={disabled}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onKeyDown={onKeyDown}
-        className="group relative flex outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
+        className={`group relative flex outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70 ${disabledSurfaceClass(
+          disabled,
+        )}`}
         style={{
           width: orientation === "vertical" ? resolvedThickness : width,
           height: orientation === "vertical" ? height : resolvedThickness,
@@ -194,18 +208,26 @@ export function Slider({
         {orientation === "vertical" ? (
           <>
             <div
-              className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"
+              className={`absolute top-0 bottom-0 left-1/2 -translate-x-1/2 rounded-full shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)] ${
+                disabled ? "bg-[var(--ui-disabled-bg)]" : "bg-zinc-800/90"
+              }`}
               style={{ width: resolvedTrackHeight }}
             />
             <div
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
+              className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full shadow-[0_0_10px_rgba(252,211,77,0.55)] ${
+                disabled
+                  ? "bg-[var(--ui-disabled-fg)] shadow-none"
+                  : "bg-amber-200/90"
+              }`}
               style={{
                 height: `${normalized * 100}%`,
                 width: resolvedTrackHeight,
               }}
             />
             <div
-              className="absolute left-1/2 -translate-x-1/2 translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
+              className={`absolute left-1/2 -translate-x-1/2 translate-y-1/2 rounded-full border border-white/10 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)] ${
+                disabled ? "bg-[var(--ui-disabled-fg)]" : "bg-zinc-900"
+              }`}
               style={{
                 bottom: `${normalized * 100}%`,
                 width: resolvedThumbSize,
@@ -216,18 +238,26 @@ export function Slider({
         ) : (
           <>
             <div
-              className="absolute left-0 right-0 rounded-full bg-zinc-800/90 shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"
+              className={`absolute left-0 right-0 rounded-full shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)] ${
+                disabled ? "bg-[var(--ui-disabled-bg)]" : "bg-zinc-800/90"
+              }`}
               style={{ height: resolvedTrackHeight }}
             />
             <div
-              className="absolute left-0 rounded-full bg-amber-200/90 shadow-[0_0_10px_rgba(252,211,77,0.55)]"
+              className={`absolute left-0 rounded-full shadow-[0_0_10px_rgba(252,211,77,0.55)] ${
+                disabled
+                  ? "bg-[var(--ui-disabled-fg)] shadow-none"
+                  : "bg-amber-200/90"
+              }`}
               style={{
                 width: `${normalized * 100}%`,
                 height: resolvedTrackHeight,
               }}
             />
             <div
-              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 bg-zinc-900 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)]"
+              className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 shadow-[0_4px_10px_-5px_rgba(0,0,0,0.9)] ${
+                disabled ? "bg-[var(--ui-disabled-fg)]" : "bg-zinc-900"
+              }`}
               style={{
                 left: `${normalized * 100}%`,
                 width: resolvedThumbSize,
@@ -237,13 +267,19 @@ export function Slider({
           </>
         )}
       </div>
+      {disabled ? <DisabledTooltip text={tooltipText} /> : null}
       {label ? (
-        <Label text={label} className="mt-[var(--ui-space-3)]" />
+        <Label
+          text={label}
+          disabled={disabled}
+          className="mt-[var(--ui-space-3)]"
+        />
       ) : null}
       <Display
         value={displayValue}
         unit={unit}
         size="sm"
+        disabled={disabled}
         className="mt-[var(--ui-space-1)]"
       />
     </div>
