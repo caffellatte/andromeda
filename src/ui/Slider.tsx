@@ -21,6 +21,7 @@ type SliderProps = {
   unit?: string;
   precision?: number;
   disabled?: boolean;
+  tooltipText?: string;
   onChange?: (value: number) => void;
   onChangeEnd?: (value: number) => void;
   className?: string;
@@ -71,6 +72,7 @@ export function Slider({
   unit,
   precision,
   disabled = false,
+  tooltipText = "Disabled",
   onChange,
   onChangeEnd,
   className = "",
@@ -265,7 +267,7 @@ export function Slider({
           </>
         )}
       </div>
-      {disabled ? <DisabledTooltip text="Disabled" /> : null}
+      {disabled ? <DisabledTooltip text={tooltipText} /> : null}
       {label ? (
         <Label
           text={label}

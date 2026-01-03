@@ -9,6 +9,7 @@ type ToggleProps = {
   size?: "sm" | "md" | "lg";
   label?: string;
   disabled?: boolean;
+  tooltipText?: string;
   onChange?: (checked: boolean) => void;
   className?: string;
 };
@@ -37,6 +38,7 @@ export function Toggle({
   size = "md",
   label,
   disabled = false,
+  tooltipText = "Disabled",
   onChange,
   className = "",
 }: ToggleProps) {
@@ -92,7 +94,7 @@ export function Toggle({
           }`}
         />
       </button>
-      {disabled ? <DisabledTooltip text="Disabled" /> : null}
+      {disabled ? <DisabledTooltip text={tooltipText} /> : null}
       {label ? (
         <Label text={label} disabled={disabled} className="mt-[var(--ui-space-3)]" />
       ) : null}

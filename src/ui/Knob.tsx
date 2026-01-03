@@ -17,6 +17,7 @@ type KnobProps = {
   precision?: number;
   indicatorOffset?: number;
   disabled?: boolean;
+  tooltipText?: string;
   onChange?: (value: number) => void;
   onChangeEnd?: (value: number) => void;
   className?: string;
@@ -54,6 +55,7 @@ export function Knob({
   precision,
   indicatorOffset = 0,
   disabled = false,
+  tooltipText = "Disabled",
   onChange,
   onChangeEnd,
   className = "",
@@ -176,7 +178,7 @@ export function Knob({
           }`}
         />
       </div>
-      {disabled ? <DisabledTooltip text="Disabled" /> : null}
+      {disabled ? <DisabledTooltip text={tooltipText} /> : null}
       {label ? (
         <Label
           text={label}
