@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Label } from "./Label";
+import { disabledSurfaceClass } from "./utils";
 
 type ToggleProps = {
   checked?: boolean;
@@ -55,7 +56,7 @@ export function Toggle({
   };
 
   return (
-    <div className={`select-none ${className}`}>
+    <div className={`group relative select-none ${className}`}>
       <button
         type="button"
         role="switch"
@@ -63,11 +64,9 @@ export function Toggle({
         aria-disabled={disabled}
         disabled={disabled}
         onClick={handleToggle}
-        className={`relative inline-flex items-center rounded-full border border-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70 ${
-          disabled
-            ? "cursor-not-allowed bg-[var(--ui-disabled-bg)] opacity-60"
-            : "cursor-pointer bg-zinc-900/80"
-        }`}
+        className={`relative inline-flex items-center rounded-full border border-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70 ${disabledSurfaceClass(
+          disabled,
+        )} ${disabled ? "bg-[var(--ui-disabled-bg)]" : "bg-zinc-900/80"}`}
         style={{ width: trackWidth, height: trackHeight }}
       >
         <span
@@ -92,6 +91,11 @@ export function Toggle({
           }`}
         />
       </button>
+      {disabled ? (
+        <div className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 rounded-full bg-zinc-900/90 px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
+          Disabled
+        </div>
+      ) : null}
       {label ? (
         <Label text={label} disabled={disabled} className="mt-[var(--ui-space-3)]" />
       ) : null}
