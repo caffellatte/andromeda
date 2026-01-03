@@ -5,3 +5,4 @@ export { Slider } from "./Slider";
 export { Toggle } from "./Toggle";
 export { disabledTextClass } from "./utils";
 export { disabledSurfaceClass } from "./utils";
+export { DisabledTooltip } from "./DisabledTooltip";
