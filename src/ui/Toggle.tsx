@@ -6,6 +6,7 @@ type ToggleProps = {
   defaultChecked?: boolean;
   size?: "sm" | "md" | "lg";
   label?: string;
+  disabled?: boolean;
   onChange?: (checked: boolean) => void;
   className?: string;
 };
@@ -33,6 +34,7 @@ export function Toggle({
   defaultChecked,
   size = "md",
   label,
+  disabled = false,
   onChange,
   className = "",
 }: ToggleProps) {
@@ -44,6 +46,7 @@ export function Toggle({
   const { trackWidth, trackHeight, thumbSize } = sizeMap[size];
 
   const handleToggle = () => {
+    if (disabled) return;
     const next = !isOn;
     if (!isControlled) {
       setInternalChecked(next);
@@ -57,8 +60,12 @@ export function Toggle({
         type="button"
         role="switch"
         aria-checked={isOn}
+        aria-disabled={disabled}
+        disabled={disabled}
         onClick={handleToggle}
-        className="relative inline-flex items-center rounded-full border border-white/10 bg-zinc-900/80 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70"
+        className={`relative inline-flex items-center rounded-full border border-white/10 bg-zinc-900/80 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/70 ${
+          disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+        }`}
         style={{ width: trackWidth, height: trackHeight }}
       >
         <span
@@ -80,7 +87,12 @@ export function Toggle({
         />
       </button>
       {label ? (
-        <Label text={label} className="mt-[var(--ui-space-3)]" />
+        <Label
+          text={label}
+          className={`mt-[var(--ui-space-3)] ${
+            disabled ? "opacity-60" : ""
+          }`}
+        />
       ) : null}
     </div>
   );
