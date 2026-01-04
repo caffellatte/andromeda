@@ -1,7 +1,6 @@
 import { DisabledTooltip } from "./DisabledTooltip";
 import { Display } from "./Display";
 import { Label } from "./Label";
-import { disabledSurfaceClass } from "./utils";
 
 type MeterProps = {
   value: number;
@@ -55,10 +54,8 @@ export function Meter({
         aria-valuemin={min}
         aria-valuemax={max}
         aria-valuenow={value}
-        className={`relative overflow-hidden rounded-full border border-white/10 ${disabledSurfaceClass(
-          disabled,
-        )} ${
-          disabled ? "bg-[var(--ui-disabled-bg)]" : "bg-zinc-900/80"
+        className={`relative cursor-default overflow-hidden rounded-full border border-white/10 ${
+          disabled ? "bg-[var(--ui-disabled-bg)] opacity-60" : "bg-zinc-900/80"
         }`}
         style={{
           width,
