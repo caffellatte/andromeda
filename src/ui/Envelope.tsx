@@ -125,7 +125,7 @@ export function Envelope({
     });
   };
 
-  const buildCurvePath = () => {
+  const getCurvePoints = () => {
     const width = 220;
     const height = 64;
     const padding = 8;
@@ -158,10 +158,26 @@ export function Envelope({
     const ySustain = padding + (1 - sustainNorm) * usableHeight;
     const yBottom = padding + usableHeight;
 
-    return `M ${x0} ${yBottom} L ${x1} ${yTop} L ${x2} ${ySustain} L ${x3} ${ySustain} L ${x4} ${yBottom}`;
+    return {
+      x0,
+      x1,
+      x2,
+      x3,
+      x4,
+      yTop,
+      ySustain,
+      yBottom,
+      padding,
+    };
   };
 
-  const curvePath = buildCurvePath();
+  const points = getCurvePoints();
+  const curvePath = `M ${points.x0} ${points.yBottom} L ${points.x1} ${points.yTop} L ${points.x2} ${points.ySustain} L ${points.x3} ${points.ySustain} L ${points.x4} ${points.yBottom}`;
+  const tickY = 60;
+  const tickA = (points.x0 + points.x1) / 2;
+  const tickD = (points.x1 + points.x2) / 2;
+  const tickS = (points.x2 + points.x3) / 2;
+  const tickR = (points.x3 + points.x4) / 2;
 
   return (
     <section className={`w-full ${className}`}>
@@ -194,8 +210,9 @@ export function Envelope({
             }`}
           />
           <text
-            x="24"
-            y="60"
+            x={tickA}
+            y={tickY}
+            textAnchor="middle"
             className={`text-[0.45rem] uppercase tracking-[0.2em] ${
               disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
             }`}
@@ -203,8 +220,9 @@ export function Envelope({
             A
           </text>
           <text
-            x="70"
-            y="60"
+            x={tickD}
+            y={tickY}
+            textAnchor="middle"
             className={`text-[0.45rem] uppercase tracking-[0.2em] ${
               disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
             }`}
@@ -212,8 +230,9 @@ export function Envelope({
             D
           </text>
           <text
-            x="118"
-            y="60"
+            x={tickS}
+            y={tickY}
+            textAnchor="middle"
             className={`text-[0.45rem] uppercase tracking-[0.2em] ${
               disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
             }`}
@@ -221,8 +240,9 @@ export function Envelope({
             S
           </text>
           <text
-            x="170"
-            y="60"
+            x={tickR}
+            y={tickY}
+            textAnchor="middle"
             className={`text-[0.45rem] uppercase tracking-[0.2em] ${
               disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
             }`}
