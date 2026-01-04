@@ -193,6 +193,42 @@ export function Envelope({
               disabled ? "stroke-[var(--ui-disabled-fg)]" : "stroke-amber-200"
             }`}
           />
+          <text
+            x="24"
+            y="60"
+            className={`text-[0.45rem] uppercase tracking-[0.2em] ${
+              disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
+            }`}
+          >
+            A
+          </text>
+          <text
+            x="70"
+            y="60"
+            className={`text-[0.45rem] uppercase tracking-[0.2em] ${
+              disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
+            }`}
+          >
+            D
+          </text>
+          <text
+            x="118"
+            y="60"
+            className={`text-[0.45rem] uppercase tracking-[0.2em] ${
+              disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
+            }`}
+          >
+            S
+          </text>
+          <text
+            x="170"
+            y="60"
+            className={`text-[0.45rem] uppercase tracking-[0.2em] ${
+              disabled ? "fill-[var(--ui-disabled-fg)]" : "fill-zinc-400"
+            }`}
+          >
+            R
+          </text>
         </svg>
       </div>
       <div className="grid grid-cols-2 gap-[var(--ui-space-4)] md:grid-cols-4">
