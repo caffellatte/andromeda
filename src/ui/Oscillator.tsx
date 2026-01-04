@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { DisabledTooltip } from "./DisabledTooltip";
 import { Knob } from "./Knob";
 import { Label } from "./Label";
-import { disabledSurfaceClass } from "./utils";
+import { WaveformSelect } from "./WaveformSelect";
 
 type OscillatorValues = {
   waveform: string;
@@ -127,28 +126,15 @@ export function Oscillator({
           className="mb-[var(--ui-space-3)]"
         />
       ) : null}
-      {disabled ? <DisabledTooltip text={tooltipText} /> : null}
-      <div className="mb-[var(--ui-space-4)] grid grid-cols-2 gap-[var(--ui-space-2)]">
-        {waveformOptions.map((option) => {
-          const isActive = option === currentWaveform;
-          return (
-            <button
-              key={option}
-              type="button"
-              disabled={disabled}
-              onClick={() => updateWaveform(option)}
-              className={`h-9 rounded-[var(--ui-radius-1)] border border-white/10 text-[0.6rem] uppercase tracking-[var(--ui-letter-1)] transition ${disabledSurfaceClass(
-                disabled,
-              )} ${
-                isActive
-                  ? "bg-amber-200/15 text-amber-100"
-                  : "bg-zinc-900/80 text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              {option}
-            </button>
-          );
-        })}
+      <div className="mb-[var(--ui-space-4)]">
+        <WaveformSelect
+          value={currentWaveform}
+          options={waveformOptions}
+          disabled={disabled}
+          tooltipText={tooltipText}
+          label="Waveform"
+          onChange={updateWaveform}
+        />
       </div>
       <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
         <Knob

@@ -7,7 +7,7 @@ type WaveformSelectProps = {
   value?: string;
   defaultValue?: string;
   options?: string[];
-  label?: string;
+  label?: string | false;
   disabled?: boolean;
   tooltipText?: string;
   onChange?: (value: string) => void;
