@@ -168,7 +168,6 @@ export function Oscillator({
           min={levelMin}
           max={levelMax}
           step={levelStep}
-          unit="%"
           disabled={disabled}
           tooltipText={tooltipText}
           onChange={updateLevel}
