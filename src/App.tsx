@@ -2,6 +2,7 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Knob, Slider } from "./ui";
 import "./App.css";
+import { Envelope } from "./ui";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -23,9 +24,17 @@ function App() {
         defaultValue={440}
       />
       <Slider thickness="lg" trackHeight="sm" thumbSize="lg" label="Mix" />
-
       <Slider orientation="vertical" height="12rem" thickness="sm" />
 
+      <Envelope
+        timeMax={5}
+        sustainMax={1}
+        defaultAttack={0.02}
+        defaultDecay={0.2}
+        defaultSustain={0.8}
+        defaultRelease={0.4}
+        onChange={(values) => console.log(values)}
+      />
       <form
         className="row"
         onSubmit={(e) => {
