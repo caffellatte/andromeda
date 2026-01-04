@@ -9,3 +9,4 @@ export { DisabledTooltip } from "./DisabledTooltip";
 export { Envelope } from "./Envelope";
 export { Oscillator } from "./Oscillator";
 export { WaveformSelect } from "./WaveformSelect";
+export { Meter } from "./Meter";
