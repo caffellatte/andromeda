@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { DisabledTooltip } from "./DisabledTooltip";
 import { Display } from "./Display";
 import { Label } from "./Label";
@@ -12,6 +13,8 @@ type MeterProps = {
   label?: string;
   unit?: string;
   showValue?: boolean;
+  showPeak?: boolean;
+  peakHoldMs?: number;
   disabled?: boolean;
   tooltipText?: string;
   className?: string;
@@ -30,12 +33,38 @@ export function Meter({
   label,
   unit,
   showValue = false,
+  showPeak = true,
+  peakHoldMs = 700,
   disabled = false,
   tooltipText = "Disabled",
   className = "",
 }: MeterProps) {
   const safeRange = Math.max(max - min, Number.EPSILON);
   const normalized = clamp((value - min) / safeRange, 0, 1);
+  const [peakValue, setPeakValue] = useState(value);
+  const peakTimeRef = useRef(Date.now());
+
+  useEffect(() => {
+    const now = Date.now();
+    if (value >= peakValue) {
+      setPeakValue(value);
+      peakTimeRef.current = now;
+    }
+  }, [value, peakValue]);
+
+  useEffect(() => {
+    if (!showPeak) return;
+    const id = window.setInterval(() => {
+      if (value >= peakValue) return;
+      const now = Date.now();
+      if (now - peakTimeRef.current >= peakHoldMs) {
+        setPeakValue(value);
+      }
+    }, 80);
+    return () => window.clearInterval(id);
+  }, [showPeak, peakHoldMs, value, peakValue]);
+
+  const peakNormalized = clamp((peakValue - min) / safeRange, 0, 1);
 
   return (
     <div className={`group relative select-none ${className}`}>
@@ -73,6 +102,26 @@ export function Meter({
             height: orientation === "vertical" ? `${normalized * 100}%` : "100%",
           }}
         />
+        {showPeak ? (
+          <div
+            className={`absolute ${
+              disabled ? "bg-[var(--ui-disabled-fg)]" : "bg-amber-100"
+            }`}
+            style={
+              orientation === "vertical"
+                ? {
+                    height: "2px",
+                    width: "100%",
+                    bottom: `${peakNormalized * 100}%`,
+                  }
+                : {
+                    width: "2px",
+                    height: "100%",
+                    left: `${peakNormalized * 100}%`,
+                  }
+            }
+          />
+        ) : null}
       </div>
       {showValue ? (
         <Display
