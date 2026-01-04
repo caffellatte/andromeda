@@ -174,6 +174,7 @@ export function Envelope({
   const points = getCurvePoints();
   const curvePath = `M ${points.x0} ${points.yBottom} L ${points.x1} ${points.yTop} L ${points.x2} ${points.ySustain} L ${points.x3} ${points.ySustain} L ${points.x4} ${points.yBottom}`;
   const tickY = 60;
+  const tickTop = 52;
   const tickA = (points.x0 + points.x1) / 2;
   const tickD = (points.x1 + points.x2) / 2;
   const tickS = (points.x2 + points.x3) / 2;
@@ -202,11 +203,49 @@ export function Envelope({
             className={`fill-none stroke-[2] ${
               disabled ? "stroke-[var(--ui-disabled-fg)]" : "stroke-amber-200"
             }`}
+            style={{ transition: "d 180ms ease" }}
           />
           <path
             d={curvePath}
             className={`fill-none stroke-[6] opacity-30 ${
               disabled ? "stroke-[var(--ui-disabled-fg)]" : "stroke-amber-200"
+            }`}
+            style={{ transition: "d 180ms ease" }}
+          />
+          <line
+            x1={tickA}
+            x2={tickA}
+            y1={tickTop}
+            y2={tickY - 4}
+            className={`stroke-[1] ${
+              disabled ? "stroke-[var(--ui-disabled-fg)]" : "stroke-zinc-600"
+            }`}
+          />
+          <line
+            x1={tickD}
+            x2={tickD}
+            y1={tickTop}
+            y2={tickY - 4}
+            className={`stroke-[1] ${
+              disabled ? "stroke-[var(--ui-disabled-fg)]" : "stroke-zinc-600"
+            }`}
+          />
+          <line
+            x1={tickS}
+            x2={tickS}
+            y1={tickTop}
+            y2={tickY - 4}
+            className={`stroke-[1] ${
+              disabled ? "stroke-[var(--ui-disabled-fg)]" : "stroke-zinc-600"
+            }`}
+          />
+          <line
+            x1={tickR}
+            x2={tickR}
+            y1={tickTop}
+            y2={tickY - 4}
+            className={`stroke-[1] ${
+              disabled ? "stroke-[var(--ui-disabled-fg)]" : "stroke-zinc-600"
             }`}
           />
           <text
