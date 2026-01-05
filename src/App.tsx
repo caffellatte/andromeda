@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Envelope,
   Knob,
@@ -7,6 +7,7 @@ import {
   Slider,
   Toggle,
 } from "./ui";
+import { getSynthState, setSynthState } from "./synth";
 import "./App.css";
 
 function App() {
@@ -26,6 +27,92 @@ function App() {
   const [master, setMaster] = useState(0.72);
   const [mono, setMono] = useState(false);
   const [sync, setSync] = useState(true);
+  const [osc, setOsc] = useState({
+    waveform: "saw",
+    tune: 0,
+    level: 0.7,
+  });
+  const [debugState, setDebugState] = useState<string>("{}");
+  const [debugPaused, setDebugPaused] = useState(false);
+  const [isFocused, setIsFocused] = useState(true);
+
+  useEffect(() => {
+    void setSynthState({
+      envelope: env,
+      oscillator: {
+        waveform: osc.waveform,
+        tune: osc.tune,
+        level: osc.level,
+        sync,
+      },
+      filter: {
+        cutoff,
+        resonance,
+        env_amount: envAmount,
+        drive,
+      },
+      mixer: {
+        noise,
+        sub,
+        master,
+      },
+      global: {
+        mono,
+        glide,
+      },
+    });
+  }, [
+    env,
+    osc,
+    sync,
+    cutoff,
+    resonance,
+    envAmount,
+    drive,
+    noise,
+    sub,
+    master,
+    mono,
+    glide,
+  ]);
+
+  useEffect(() => {
+    const onFocus = () => setIsFocused(true);
+    const onBlur = () => setIsFocused(false);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const fetchState = async () => {
+      try {
+        const state = await getSynthState();
+        if (active) {
+          setDebugState(JSON.stringify(state, null, 2));
+        }
+      } catch {
+        if (active) {
+          setDebugState("{\"error\":\"failed to fetch synth state\"}");
+        }
+      }
+    };
+    if (!debugPaused && isFocused) {
+      void fetchState();
+    }
+    const id =
+      !debugPaused && isFocused ? window.setInterval(fetchState, 750) : undefined;
+    return () => {
+      active = false;
+      if (id) {
+        window.clearInterval(id);
+      }
+    };
+  }, [debugPaused, isFocused]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(63,63,70,0.3),_rgba(9,9,11,0.95))] p-6 text-zinc-100 md:p-10">
@@ -45,7 +132,13 @@ function App() {
         <section className="rounded-[var(--ui-radius-3)] border border-white/10 bg-zinc-950/60 p-6 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.85)]">
           <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr]">
             <div className="space-y-6">
-              <Oscillator label="Oscillator A" />
+              <Oscillator
+                label="Oscillator A"
+                waveform={osc.waveform}
+                tune={osc.tune}
+                level={osc.level}
+                onChange={setOsc}
+              />
 
               <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
                 <Toggle label="Mono" checked={mono} onChange={setMono} />
@@ -154,6 +247,40 @@ function App() {
               </div>
             </div>
           </div>
+        </section>
+        <section className="rounded-[var(--ui-radius-2)] border border-white/10 bg-zinc-950/70 p-4">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.3em] text-zinc-500">
+            <span>Synth Debug State</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+                onClick={() => setDebugPaused((prev) => !prev)}
+              >
+                {debugPaused ? "Resume" : "Pause"}
+              </button>
+              <button
+                type="button"
+                className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+                onClick={async () => {
+                  try {
+                    const state = await getSynthState();
+                    setDebugState(JSON.stringify(state, null, 2));
+                  } catch {
+                    setDebugState("{\"error\":\"failed to fetch synth state\"}");
+                  }
+                }}
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div className="mb-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500">
+            {isFocused ? "Focused" : "Paused (blurred)"}
+          </div>
+          <pre className="max-h-64 overflow-auto rounded-[var(--ui-radius-1)] bg-black/40 p-3 text-[0.65rem] text-zinc-300">
+            {debugState}
+          </pre>
         </section>
       </div>
     </main>
