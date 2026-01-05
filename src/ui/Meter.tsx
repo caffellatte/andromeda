@@ -52,6 +52,7 @@ export function Meter({
     if (value >= peakValue) {
       setPeakValue(value);
       peakTimeRef.current = now;
+      peakTickRef.current = now;
     }
   }, [value, peakValue]);
 
