@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Envelope,
   Knob,
@@ -7,6 +7,7 @@ import {
   Slider,
   Toggle,
 } from "./ui";
+import { setSynthState } from "./synth";
 import "./App.css";
 
 function App() {
@@ -26,6 +27,51 @@ function App() {
   const [master, setMaster] = useState(0.72);
   const [mono, setMono] = useState(false);
   const [sync, setSync] = useState(true);
+  const [osc, setOsc] = useState({
+    waveform: "saw",
+    tune: 0,
+    level: 0.7,
+  });
+
+  useEffect(() => {
+    void setSynthState({
+      envelope: env,
+      oscillator: {
+        waveform: osc.waveform,
+        tune: osc.tune,
+        level: osc.level,
+        sync,
+      },
+      filter: {
+        cutoff,
+        resonance,
+        env_amount: envAmount,
+        drive,
+      },
+      mixer: {
+        noise,
+        sub,
+        master,
+      },
+      global: {
+        mono,
+        glide,
+      },
+    });
+  }, [
+    env,
+    osc,
+    sync,
+    cutoff,
+    resonance,
+    envAmount,
+    drive,
+    noise,
+    sub,
+    master,
+    mono,
+    glide,
+  ]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(63,63,70,0.3),_rgba(9,9,11,0.95))] p-6 text-zinc-100 md:p-10">
@@ -45,7 +91,13 @@ function App() {
         <section className="rounded-[var(--ui-radius-3)] border border-white/10 bg-zinc-950/60 p-6 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.85)]">
           <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr]">
             <div className="space-y-6">
-              <Oscillator label="Oscillator A" />
+              <Oscillator
+                label="Oscillator A"
+                waveform={osc.waveform}
+                tune={osc.tune}
+                level={osc.level}
+                onChange={setOsc}
+              />
 
               <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
                 <Toggle label="Mono" checked={mono} onChange={setMono} />
