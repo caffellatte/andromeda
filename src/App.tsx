@@ -1,55 +1,161 @@
 import { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { Knob, Slider } from "./ui";
+import {
+  Envelope,
+  Knob,
+  Meter,
+  Oscillator,
+  Slider,
+  Toggle,
+} from "./ui";
 import "./App.css";
-import { Envelope } from "./ui";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
-
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+  const [env, setEnv] = useState({
+    attack: 0.02,
+    decay: 0.25,
+    sustain: 0.7,
+    release: 0.4,
+  });
+  const [cutoff, setCutoff] = useState(1400);
+  const [resonance, setResonance] = useState(0.35);
+  const [envAmount, setEnvAmount] = useState(0.55);
+  const [noise, setNoise] = useState(0.12);
+  const [sub, setSub] = useState(0.3);
+  const [drive, setDrive] = useState(0.2);
+  const [glide, setGlide] = useState(0.05);
+  const [master, setMaster] = useState(0.72);
+  const [mono, setMono] = useState(false);
+  const [sync, setSync] = useState(true);
 
   return (
-    <main className="container">
-      <Knob
-        label="Cutoff"
-        min={20}
-        max={20000}
-        step={1}
-        unit="Hz"
-        defaultValue={440}
-      />
-      <Slider thickness="lg" trackHeight="sm" thumbSize="lg" label="Mix" />
-      <Slider orientation="vertical" height="12rem" thickness="sm" />
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(63,63,70,0.3),_rgba(9,9,11,0.95))] p-6 text-zinc-100 md:p-10">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <header className="flex flex-col gap-2">
+          <p className="text-xs uppercase tracking-[0.5em] text-zinc-500">
+            Synth Panel
+          </p>
+          <h1 className="text-3xl font-semibold tracking-tight text-zinc-100">
+            Andromeda Voice
+          </h1>
+          <p className="text-sm text-zinc-400">
+            Prototype layout to stress spacing, input feel, and disabled states.
+          </p>
+        </header>
 
-      <Envelope
-        timeMax={5}
-        sustainMax={1}
-        defaultAttack={0.02}
-        defaultDecay={0.2}
-        defaultSustain={0.8}
-        defaultRelease={0.4}
-        onChange={(values) => console.log(values)}
-      />
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
+        <section className="rounded-[var(--ui-radius-3)] border border-white/10 bg-zinc-950/60 p-6 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.85)]">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_1fr]">
+            <div className="space-y-6">
+              <Oscillator label="Oscillator A" />
+
+              <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
+                <Toggle label="Mono" checked={mono} onChange={setMono} />
+                <Toggle label="Sync" checked={sync} onChange={setSync} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
+                <Knob
+                  label="Glide"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={glide}
+                  unit="s"
+                  onChange={setGlide}
+                />
+                <Knob
+                  label="Drive"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={drive}
+                  onChange={setDrive}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <Envelope
+                attack={env.attack}
+                decay={env.decay}
+                sustain={env.sustain}
+                release={env.release}
+                timeMax={2}
+                onChange={setEnv}
+              />
+
+              <div className="grid grid-cols-3 gap-[var(--ui-space-4)]">
+                <Knob
+                  label="Cutoff"
+                  min={20}
+                  max={20000}
+                  step={1}
+                  value={cutoff}
+                  unit="Hz"
+                  onChange={setCutoff}
+                />
+                <Knob
+                  label="Resonance"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={resonance}
+                  onChange={setResonance}
+                />
+                <Knob
+                  label="Env Amt"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={envAmount}
+                  onChange={setEnvAmount}
+                />
+              </div>
+
+              <div className="grid gap-[var(--ui-space-6)] md:grid-cols-[1fr_auto]">
+                <div className="space-y-[var(--ui-space-4)]">
+                  <Slider
+                    label="Noise"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={noise}
+                    onChange={setNoise}
+                  />
+                  <Slider
+                    label="Sub"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={sub}
+                    onChange={setSub}
+                  />
+                </div>
+                <div className="flex flex-col items-center gap-[var(--ui-space-4)]">
+                  <Slider
+                    label="Output"
+                    orientation="vertical"
+                    height="12rem"
+                    thickness="sm"
+                    value={master}
+                    onChange={setMaster}
+                  />
+                  <Meter
+                    label="Level"
+                    orientation="vertical"
+                    width="1.25rem"
+                    height="10rem"
+                    value={master}
+                    min={0}
+                    max={1}
+                    showPeak
+                    peakFps={24}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
