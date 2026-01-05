@@ -58,20 +58,27 @@ export function Meter({
 
   useEffect(() => {
     if (!showPeak) return;
-    const id = window.setInterval(() => {
-      if (value >= peakValue) return;
-      const now = Date.now();
-      const dt = (now - peakTickRef.current) / 1000;
-      peakTickRef.current = now;
-      if (now - peakTimeRef.current < peakHoldMs) return;
-      if (peakFalloffPerSec <= 0) {
-        setPeakValue(value);
-        return;
+    let frameId = 0;
+    const tick = () => {
+      if (value < peakValue) {
+        const now = Date.now();
+        const dt = (now - peakTickRef.current) / 1000;
+        peakTickRef.current = now;
+        if (now - peakTimeRef.current >= peakHoldMs) {
+          if (peakFalloffPerSec <= 0) {
+            setPeakValue(value);
+          } else {
+            const next = Math.max(value, peakValue - peakFalloffPerSec * dt);
+            setPeakValue(next);
+          }
+        }
+      } else {
+        peakTickRef.current = Date.now();
       }
-      const next = Math.max(value, peakValue - peakFalloffPerSec * dt);
-      setPeakValue(next);
-    }, 80);
-    return () => window.clearInterval(id);
+      frameId = window.requestAnimationFrame(tick);
+    };
+    frameId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frameId);
   }, [showPeak, peakHoldMs, peakFalloffPerSec, value, peakValue]);
 
   const peakNormalized = clamp((peakValue - min) / safeRange, 0, 1);
