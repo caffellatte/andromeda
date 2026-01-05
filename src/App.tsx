@@ -7,7 +7,7 @@ import {
   Slider,
   Toggle,
 } from "./ui";
-import { setSynthState } from "./synth";
+import { getSynthState, setSynthState } from "./synth";
 import "./App.css";
 
 function App() {
@@ -32,6 +32,7 @@ function App() {
     tune: 0,
     level: 0.7,
   });
+  const [debugState, setDebugState] = useState<string>("{}");
 
   useEffect(() => {
     void setSynthState({
@@ -72,6 +73,28 @@ function App() {
     mono,
     glide,
   ]);
+
+  useEffect(() => {
+    let active = true;
+    const fetchState = async () => {
+      try {
+        const state = await getSynthState();
+        if (active) {
+          setDebugState(JSON.stringify(state, null, 2));
+        }
+      } catch {
+        if (active) {
+          setDebugState("{\"error\":\"failed to fetch synth state\"}");
+        }
+      }
+    };
+    void fetchState();
+    const id = window.setInterval(fetchState, 750);
+    return () => {
+      active = false;
+      window.clearInterval(id);
+    };
+  }, []);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(63,63,70,0.3),_rgba(9,9,11,0.95))] p-6 text-zinc-100 md:p-10">
@@ -206,6 +229,14 @@ function App() {
               </div>
             </div>
           </div>
+        </section>
+        <section className="rounded-[var(--ui-radius-2)] border border-white/10 bg-zinc-950/70 p-4">
+          <div className="mb-2 text-xs uppercase tracking-[0.3em] text-zinc-500">
+            Synth Debug State
+          </div>
+          <pre className="max-h-64 overflow-auto rounded-[var(--ui-radius-1)] bg-black/40 p-3 text-[0.65rem] text-zinc-300">
+            {debugState}
+          </pre>
         </section>
       </div>
     </main>
