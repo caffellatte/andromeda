@@ -16,6 +16,7 @@ type MeterProps = {
   showPeak?: boolean;
   peakHoldMs?: number;
   peakFalloffPerSec?: number;
+  peakFps?: number;
   disabled?: boolean;
   tooltipText?: string;
   className?: string;
@@ -37,6 +38,7 @@ export function Meter({
   showPeak = true,
   peakHoldMs = 700,
   peakFalloffPerSec = 1,
+  peakFps = 30,
   disabled = false,
   tooltipText = "Disabled",
   className = "",
@@ -46,6 +48,9 @@ export function Meter({
   const [peakValue, setPeakValue] = useState(value);
   const peakTimeRef = useRef(Date.now());
   const peakTickRef = useRef(Date.now());
+  const lastFrameRef = useRef(0);
+  const hiddenRef = useRef(false);
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const now = Date.now();
@@ -57,11 +62,28 @@ export function Meter({
   }, [value, peakValue]);
 
   useEffect(() => {
+    const updateHidden = () => {
+      hiddenRef.current = document.visibilityState !== "visible";
+    };
+    updateHidden();
+    document.addEventListener("visibilitychange", updateHidden);
+    return () => {
+      document.removeEventListener("visibilitychange", updateHidden);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!showPeak) return;
     let frameId = 0;
     const tick = () => {
+      const now = Date.now();
+      const frameInterval = peakFps > 0 ? 1000 / peakFps : 0;
+      if (frameInterval > 0 && now - lastFrameRef.current < frameInterval) {
+        frameId = window.requestAnimationFrame(tick);
+        return;
+      }
+      lastFrameRef.current = now;
       if (value < peakValue) {
-        const now = Date.now();
         const dt = (now - peakTickRef.current) / 1000;
         peakTickRef.current = now;
         if (now - peakTimeRef.current >= peakHoldMs) {
@@ -75,11 +97,23 @@ export function Meter({
       } else {
         peakTickRef.current = Date.now();
       }
+      if (hiddenRef.current) {
+        timeoutRef.current = window.setTimeout(() => {
+          frameId = window.requestAnimationFrame(tick);
+        }, 500);
+        return;
+      }
       frameId = window.requestAnimationFrame(tick);
     };
     frameId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [showPeak, peakHoldMs, peakFalloffPerSec, value, peakValue]);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [showPeak, peakHoldMs, peakFalloffPerSec, peakFps, value, peakValue]);
 
   const peakNormalized = clamp((peakValue - min) / safeRange, 0, 1);
 
