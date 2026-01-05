@@ -33,6 +33,8 @@ function App() {
     level: 0.7,
   });
   const [debugState, setDebugState] = useState<string>("{}");
+  const [debugPaused, setDebugPaused] = useState(false);
+  const [isFocused, setIsFocused] = useState(true);
 
   useEffect(() => {
     void setSynthState({
@@ -75,6 +77,17 @@ function App() {
   ]);
 
   useEffect(() => {
+    const onFocus = () => setIsFocused(true);
+    const onBlur = () => setIsFocused(false);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
+  useEffect(() => {
     let active = true;
     const fetchState = async () => {
       try {
@@ -88,13 +101,18 @@ function App() {
         }
       }
     };
-    void fetchState();
-    const id = window.setInterval(fetchState, 750);
+    if (!debugPaused && isFocused) {
+      void fetchState();
+    }
+    const id =
+      !debugPaused && isFocused ? window.setInterval(fetchState, 750) : undefined;
     return () => {
       active = false;
-      window.clearInterval(id);
+      if (id) {
+        window.clearInterval(id);
+      }
     };
-  }, []);
+  }, [debugPaused, isFocused]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(63,63,70,0.3),_rgba(9,9,11,0.95))] p-6 text-zinc-100 md:p-10">
@@ -231,8 +249,34 @@ function App() {
           </div>
         </section>
         <section className="rounded-[var(--ui-radius-2)] border border-white/10 bg-zinc-950/70 p-4">
-          <div className="mb-2 text-xs uppercase tracking-[0.3em] text-zinc-500">
-            Synth Debug State
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.3em] text-zinc-500">
+            <span>Synth Debug State</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+                onClick={() => setDebugPaused((prev) => !prev)}
+              >
+                {debugPaused ? "Resume" : "Pause"}
+              </button>
+              <button
+                type="button"
+                className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+                onClick={async () => {
+                  try {
+                    const state = await getSynthState();
+                    setDebugState(JSON.stringify(state, null, 2));
+                  } catch {
+                    setDebugState("{\"error\":\"failed to fetch synth state\"}");
+                  }
+                }}
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div className="mb-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500">
+            {isFocused ? "Focused" : "Paused (blurred)"}
           </div>
           <pre className="max-h-64 overflow-auto rounded-[var(--ui-radius-1)] bg-black/40 p-3 text-[0.65rem] text-zinc-300">
             {debugState}
