@@ -15,6 +15,7 @@ type MeterProps = {
   showValue?: boolean;
   showPeak?: boolean;
   peakHoldMs?: number;
+  peakFalloffPerSec?: number;
   disabled?: boolean;
   tooltipText?: string;
   className?: string;
@@ -35,6 +36,7 @@ export function Meter({
   showValue = false,
   showPeak = true,
   peakHoldMs = 700,
+  peakFalloffPerSec = 1,
   disabled = false,
   tooltipText = "Disabled",
   className = "",
@@ -43,6 +45,7 @@ export function Meter({
   const normalized = clamp((value - min) / safeRange, 0, 1);
   const [peakValue, setPeakValue] = useState(value);
   const peakTimeRef = useRef(Date.now());
+  const peakTickRef = useRef(Date.now());
 
   useEffect(() => {
     const now = Date.now();
@@ -57,12 +60,18 @@ export function Meter({
     const id = window.setInterval(() => {
       if (value >= peakValue) return;
       const now = Date.now();
-      if (now - peakTimeRef.current >= peakHoldMs) {
+      const dt = (now - peakTickRef.current) / 1000;
+      peakTickRef.current = now;
+      if (now - peakTimeRef.current < peakHoldMs) return;
+      if (peakFalloffPerSec <= 0) {
         setPeakValue(value);
+        return;
       }
+      const next = Math.max(value, peakValue - peakFalloffPerSec * dt);
+      setPeakValue(next);
     }, 80);
     return () => window.clearInterval(id);
-  }, [showPeak, peakHoldMs, value, peakValue]);
+  }, [showPeak, peakHoldMs, peakFalloffPerSec, value, peakValue]);
 
   const peakNormalized = clamp((peakValue - min) / safeRange, 0, 1);
 
