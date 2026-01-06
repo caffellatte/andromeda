@@ -7,7 +7,13 @@ import {
   Slider,
   Toggle,
 } from "./ui";
-import { getSynthState, setSynthState } from "./synth";
+import {
+  getSynthState,
+  isAudioRunning,
+  setSynthState,
+  startAudio,
+  stopAudio,
+} from "./synth";
 import "./App.css";
 
 function App() {
@@ -32,6 +38,8 @@ function App() {
     tune: 0,
     level: 0.7,
   });
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
   const [debugState, setDebugState] = useState<string>("{}");
   const [debugPaused, setDebugPaused] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
@@ -85,6 +93,26 @@ function App() {
     return () => {
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const fetchAudioState = async () => {
+      try {
+        const running = await isAudioRunning();
+        if (active) {
+          setIsPlaying(running);
+        }
+      } catch {
+        if (active) {
+          setAudioError("Failed to read audio state.");
+        }
+      }
+    };
+    void fetchAudioState();
+    return () => {
+      active = false;
     };
   }, []);
 
@@ -146,6 +174,38 @@ function App() {
               <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
                 <Toggle label="Mono" checked={mono} onChange={setMono} />
                 <Toggle label="Sync" checked={sync} onChange={setSync} />
+              </div>
+              <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
+                <Toggle
+                  label="Play"
+                  checked={isPlaying}
+                  onChange={async (next) => {
+                    setAudioError(null);
+                    if (next) {
+                      try {
+                        const started = await startAudio();
+                        if (!started) {
+                          setAudioError("Audio already running.");
+                        }
+                        setIsPlaying(started ? next : false);
+                        return;
+                      } catch {
+                        setAudioError("Audio start failed.");
+                        setIsPlaying(false);
+                        return;
+                      }
+                    }
+                    try {
+                      await stopAudio();
+                    } catch {
+                      setAudioError("Audio stop failed.");
+                    }
+                    setIsPlaying(false);
+                  }}
+                />
+                <div className="flex items-center text-xs text-amber-200/80">
+                  {audioError ?? ""}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
