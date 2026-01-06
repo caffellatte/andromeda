@@ -230,17 +230,6 @@ function App() {
                   onChange={setDrive}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
-                <Knob
-                  label="Clip"
-                  min={0.05}
-                  max={1}
-                  step={0.01}
-                  value={clipAmount}
-                  onChange={setClipAmount}
-                />
-                <div />
-              </div>
             </div>
 
             <div className="space-y-6">
@@ -300,26 +289,39 @@ function App() {
                     onChange={setSub}
                   />
                 </div>
-                <div className="flex flex-col items-center gap-[var(--ui-space-4)]">
-                  <Slider
-                    label="Output"
-                    orientation="vertical"
-                    height="12rem"
-                    thickness="sm"
-                    value={master}
-                    onChange={setMaster}
-                  />
-                  <Meter
-                    label="Level"
-                    orientation="vertical"
-                    width="1.25rem"
-                    height="10rem"
-                    value={master}
-                    min={0}
-                    max={1}
-                    showPeak
-                    peakFps={24}
-                  />
+                <div className="rounded-[var(--ui-radius-2)] border border-white/10 bg-zinc-950/60 p-[var(--ui-space-4)]">
+                  <div className="mb-[var(--ui-space-3)] text-[0.6rem] uppercase tracking-[0.3em] text-zinc-500">
+                    Master
+                  </div>
+                  <div className="flex flex-col items-center gap-[var(--ui-space-4)]">
+                    <Slider
+                      label="Output"
+                      orientation="vertical"
+                      height="12rem"
+                      thickness="sm"
+                      value={master}
+                      onChange={setMaster}
+                    />
+                    <Knob
+                      label="Clip"
+                      min={0.05}
+                      max={1}
+                      step={0.01}
+                      value={clipAmount}
+                      onChange={setClipAmount}
+                    />
+                    <Meter
+                      label="Level"
+                      orientation="vertical"
+                      width="1.25rem"
+                      height="10rem"
+                      value={master}
+                      min={0}
+                      max={1}
+                      showPeak
+                      peakFps={24}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
