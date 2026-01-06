@@ -35,23 +35,29 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
         SampleFormat::F32 => {
             let cfg = stream_config.clone();
             let mut phase = 0.0f32;
+            let mut z = 0.0f32;
             let state = state.clone();
             device
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [f32], _| {
-                        let (freq, waveform, level) = state
+                        let (freq, waveform, level, master, cutoff) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
                                 let waveform = s.oscillator.waveform.clone();
                                 let level = s.oscillator.level.max(0.0).min(1.0);
-                                (freq, waveform, level)
+                                let master = s.mixer.master.max(0.0).min(1.0);
+                                let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
+                                (freq, waveform, level, master, cutoff)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0));
+                        let a = (-2.0 * PI * cutoff / sample_rate).exp();
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
-                            let value = wave_value(&waveform, phase) * level * 0.25;
+                            let raw = wave_value(&waveform, phase) * level;
+                            z = (1.0 - a) * raw + a * z;
+                            let value = z * master * 0.25;
                             for sample in frame.iter_mut() {
                                 *sample = value;
                             }
@@ -65,23 +71,29 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
         SampleFormat::I16 => {
             let cfg = stream_config.clone();
             let mut phase = 0.0f32;
+            let mut z = 0.0f32;
             let state = state.clone();
             device
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [i16], _| {
-                        let (freq, waveform, level) = state
+                        let (freq, waveform, level, master, cutoff) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
                                 let waveform = s.oscillator.waveform.clone();
                                 let level = s.oscillator.level.max(0.0).min(1.0);
-                                (freq, waveform, level)
+                                let master = s.mixer.master.max(0.0).min(1.0);
+                                let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
+                                (freq, waveform, level, master, cutoff)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0));
+                        let a = (-2.0 * PI * cutoff / sample_rate).exp();
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
-                            let value = wave_value(&waveform, phase) * level * 0.25;
+                            let raw = wave_value(&waveform, phase) * level;
+                            z = (1.0 - a) * raw + a * z;
+                            let value = z * master * 0.25;
                             let sample = i16::from_sample(value);
                             for out in frame.iter_mut() {
                                 *out = sample;
@@ -96,23 +108,29 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
         SampleFormat::U16 => {
             let cfg = stream_config.clone();
             let mut phase = 0.0f32;
+            let mut z = 0.0f32;
             let state = state.clone();
             device
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [u16], _| {
-                        let (freq, waveform, level) = state
+                        let (freq, waveform, level, master, cutoff) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
                                 let waveform = s.oscillator.waveform.clone();
                                 let level = s.oscillator.level.max(0.0).min(1.0);
-                                (freq, waveform, level)
+                                let master = s.mixer.master.max(0.0).min(1.0);
+                                let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
+                                (freq, waveform, level, master, cutoff)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0));
+                        let a = (-2.0 * PI * cutoff / sample_rate).exp();
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
-                            let value = wave_value(&waveform, phase) * level * 0.25;
+                            let raw = wave_value(&waveform, phase) * level;
+                            z = (1.0 - a) * raw + a * z;
+                            let value = z * master * 0.25;
                             let sample = u16::from_sample(value);
                             for out in frame.iter_mut() {
                                 *out = sample;
