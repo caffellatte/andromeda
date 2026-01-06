@@ -41,6 +41,19 @@ export type SynthState = {
   global: GlobalState;
 };
 
+export type AutomationEvent = {
+  time_ms: number;
+  path: string;
+  value: number | string | boolean;
+  curve?: "step" | "linear";
+};
+
+export type RenderRequest = {
+  duration_ms: number;
+  sample_rate: number;
+  events: AutomationEvent[];
+};
+
 export const getSynthState = () => invoke<SynthState>("synth_get_state");
 
 export const setSynthState = (state: SynthState) =>
@@ -53,3 +66,6 @@ export const startAudio = () => invoke<boolean>("audio_start");
 export const stopAudio = () => invoke<boolean>("audio_stop");
 
 export const isAudioRunning = () => invoke<boolean>("audio_is_running");
+
+export const renderSample = (request: RenderRequest) =>
+  invoke<string>("render_sample", { request });

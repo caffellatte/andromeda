@@ -1,7 +1,10 @@
 mod audio;
+mod automation;
+mod render;
 mod synth;
 
 use audio::{audio_is_running, audio_start, audio_stop, AudioEngine};
+use render::render_sample;
 use synth::{synth_get_state, synth_reset, synth_set_state, SynthEngine};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -16,7 +19,8 @@ pub fn run() {
             synth_reset,
             audio_start,
             audio_stop,
-            audio_is_running
+            audio_is_running,
+            render_sample
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
