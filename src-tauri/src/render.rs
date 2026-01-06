@@ -50,7 +50,10 @@ pub fn render_sample(request: RenderRequest, synth: State<SynthEngine>) -> Resul
         sample_format: SampleFormat::Int,
     };
 
-    let mut path = std::env::temp_dir();
+    let mut path = dirs::desktop_dir().ok_or("desktop directory not found")?;
+    path.push("Andromeda Samples");
+    std::fs::create_dir_all(&path)
+        .map_err(|e| format!("failed to create output directory: {e}"))?;
     let millis = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(|_| "system time before unix epoch".to_string())?
