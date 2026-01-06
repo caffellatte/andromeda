@@ -431,15 +431,13 @@ function App() {
                 max={20000}
                 step={100}
                 value={timeline.duration_ms}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const nextValue = Number(e.currentTarget.value) || 3000;
                   setTimeline((prev) => ({
                     ...prev,
-                    duration_ms: Math.min(
-                      20000,
-                      Math.max(500, Number(e.currentTarget.value) || 3000),
-                    ),
-                  }))
-                }
+                    duration_ms: Math.min(20000, Math.max(500, nextValue)),
+                  }));
+                }}
                 className="w-20 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
               />
               ms
@@ -502,12 +500,12 @@ function App() {
                     Path
                     <select
                       value={track.path}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        const nextPath = e.currentTarget.value;
                         setTimeline((prev) => {
                           const next = { ...prev };
                           const nextTracks = [...next.tracks];
                           const nextTrack = { ...nextTracks[trackIndex] };
-                          const nextPath = e.currentTarget.value;
                           nextTrack.path = nextPath;
                           nextTrack.keyframes = nextTrack.keyframes.map(
                             (keyframe) => ({
@@ -518,8 +516,8 @@ function App() {
                           nextTracks[trackIndex] = nextTrack;
                           next.tracks = nextTracks;
                           return next;
-                        })
-                      }
+                        });
+                      }}
                       className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
                     >
                       {parameterOptions.map((option) => (
@@ -581,7 +579,8 @@ function App() {
                           max={timeline.duration_ms}
                           step={50}
                           value={keyframe.time_ms}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const nextTime = Number(e.currentTarget.value) || 0;
                             setTimeline((prev) => {
                               const next = { ...prev };
                               const nextTracks = [...next.tracks];
@@ -590,15 +589,15 @@ function App() {
                               const nextKeyframe = { ...nextKeyframes[keyIndex] };
                               nextKeyframe.time_ms = Math.min(
                                 prev.duration_ms,
-                                Math.max(0, Number(e.currentTarget.value) || 0),
+                                Math.max(0, nextTime),
                               );
                               nextKeyframes[keyIndex] = nextKeyframe;
                               nextTrack.keyframes = nextKeyframes;
                               nextTracks[trackIndex] = nextTrack;
                               next.tracks = nextTracks;
                               return next;
-                            })
-                          }
+                            });
+                          }}
                           className="w-20 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
                         />
                       </label>
@@ -611,7 +610,8 @@ function App() {
                                 ? keyframe.value
                                 : "sine"
                             }
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              const nextValue = e.currentTarget.value;
                               setTimeline((prev) => {
                                 const next = { ...prev };
                                 const nextTracks = [...next.tracks];
@@ -620,14 +620,14 @@ function App() {
                                 const nextKeyframe = {
                                   ...nextKeyframes[keyIndex],
                                 };
-                                nextKeyframe.value = e.currentTarget.value;
+                                nextKeyframe.value = nextValue;
                                 nextKeyframes[keyIndex] = nextKeyframe;
                                 nextTrack.keyframes = nextKeyframes;
                                 nextTracks[trackIndex] = nextTrack;
                                 next.tracks = nextTracks;
                                 return next;
-                              })
-                            }
+                              });
+                            }}
                             className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
                           >
                             <option value="sine">sine</option>
@@ -641,7 +641,8 @@ function App() {
                           Value
                           <select
                             value={keyframe.value ? "true" : "false"}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              const nextValue = e.currentTarget.value === "true";
                               setTimeline((prev) => {
                                 const next = { ...prev };
                                 const nextTracks = [...next.tracks];
@@ -650,15 +651,14 @@ function App() {
                                 const nextKeyframe = {
                                   ...nextKeyframes[keyIndex],
                                 };
-                                nextKeyframe.value =
-                                  e.currentTarget.value === "true";
+                                nextKeyframe.value = nextValue;
                                 nextKeyframes[keyIndex] = nextKeyframe;
                                 nextTrack.keyframes = nextKeyframes;
                                 nextTracks[trackIndex] = nextTrack;
                                 next.tracks = nextTracks;
                                 return next;
-                              })
-                            }
+                              });
+                            }}
                             className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
                           >
                             <option value="true">true</option>
@@ -676,7 +676,8 @@ function App() {
                                 ? keyframe.value
                                 : 0
                             }
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              const nextValue = Number(e.currentTarget.value);
                               setTimeline((prev) => {
                                 const next = { ...prev };
                                 const nextTracks = [...next.tracks];
@@ -685,16 +686,14 @@ function App() {
                                 const nextKeyframe = {
                                   ...nextKeyframes[keyIndex],
                                 };
-                                nextKeyframe.value = Number(
-                                  e.currentTarget.value,
-                                );
+                                nextKeyframe.value = nextValue;
                                 nextKeyframes[keyIndex] = nextKeyframe;
                                 nextTrack.keyframes = nextKeyframes;
                                 nextTracks[trackIndex] = nextTrack;
                                 next.tracks = nextTracks;
                                 return next;
-                              })
-                            }
+                              });
+                            }}
                             className="w-24 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
                           />
                         </label>
@@ -703,22 +702,24 @@ function App() {
                         Curve
                         <select
                           value={keyframe.curve ?? "step"}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const nextValue = e.currentTarget.value as
+                              | "step"
+                              | "linear";
                             setTimeline((prev) => {
                               const next = { ...prev };
                               const nextTracks = [...next.tracks];
                               const nextTrack = { ...nextTracks[trackIndex] };
                               const nextKeyframes = [...nextTrack.keyframes];
                               const nextKeyframe = { ...nextKeyframes[keyIndex] };
-                              nextKeyframe.curve = e.currentTarget
-                                .value as "step" | "linear";
+                              nextKeyframe.curve = nextValue;
                               nextKeyframes[keyIndex] = nextKeyframe;
                               nextTrack.keyframes = nextKeyframes;
                               nextTracks[trackIndex] = nextTrack;
                               next.tracks = nextTracks;
                               return next;
-                            })
-                          }
+                            });
+                          }}
                           className="w-24 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
                         >
                           <option value="step">Step</option>
