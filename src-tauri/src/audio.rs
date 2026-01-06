@@ -32,12 +32,12 @@ fn build_stream() -> Result<Stream, String> {
 
     let stream = match config.sample_format() {
         SampleFormat::F32 => {
-            let cfg = config.into();
+            let cfg = config.clone().into();
+            let mut phase = 0.0f32;
             device
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [f32], _| {
-                        let mut phase = 0.0f32;
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let value = (phase * 2.0 * PI).sin() * amplitude;
@@ -52,12 +52,12 @@ fn build_stream() -> Result<Stream, String> {
                 .map_err(|e| format!("stream build error: {e}"))?
         }
         SampleFormat::I16 => {
-            let cfg = config.into();
+            let cfg = config.clone().into();
+            let mut phase = 0.0f32;
             device
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [i16], _| {
-                        let mut phase = 0.0f32;
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let value = (phase * 2.0 * PI).sin() * amplitude;
@@ -73,12 +73,12 @@ fn build_stream() -> Result<Stream, String> {
                 .map_err(|e| format!("stream build error: {e}"))?
         }
         SampleFormat::U16 => {
-            let cfg = config.into();
+            let cfg = config.clone().into();
+            let mut phase = 0.0f32;
             device
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [u16], _| {
-                        let mut phase = 0.0f32;
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let value = (phase * 2.0 * PI).sin() * amplitude;
