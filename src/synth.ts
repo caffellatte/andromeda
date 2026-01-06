@@ -46,3 +46,9 @@ export const setSynthState = (state: SynthState) =>
   invoke("synth_set_state", { next: state });
 
 export const resetSynthState = () => invoke<SynthState>("synth_reset");
+
+export const startAudio = () => invoke<boolean>("audio_start");
+
+export const stopAudio = () => invoke<boolean>("audio_stop");
+
+export const isAudioRunning = () => invoke<boolean>("audio_is_running");
