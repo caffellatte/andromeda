@@ -35,6 +35,7 @@ function App() {
   const [debugState, setDebugState] = useState<string>("{}");
   const [debugPaused, setDebugPaused] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
+  const [pollIntervalMs, setPollIntervalMs] = useState(750);
 
   useEffect(() => {
     void setSynthState({
@@ -105,14 +106,16 @@ function App() {
       void fetchState();
     }
     const id =
-      !debugPaused && isFocused ? window.setInterval(fetchState, 750) : undefined;
+      !debugPaused && isFocused
+        ? window.setInterval(fetchState, pollIntervalMs)
+        : undefined;
     return () => {
       active = false;
       if (id) {
         window.clearInterval(id);
       }
     };
-  }, [debugPaused, isFocused]);
+  }, [debugPaused, isFocused, pollIntervalMs]);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(63,63,70,0.3),_rgba(9,9,11,0.95))] p-6 text-zinc-100 md:p-10">
@@ -252,6 +255,26 @@ function App() {
           <div className="mb-2 flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.3em] text-zinc-500">
             <span>Synth Debug State</span>
             <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500">
+                Poll
+                <input
+                  type="number"
+                  min={100}
+                  max={5000}
+                  step={100}
+                  value={pollIntervalMs}
+                  onChange={(e) =>
+                    setPollIntervalMs(
+                      Math.min(
+                        5000,
+                        Math.max(100, Number(e.currentTarget.value) || 750),
+                      ),
+                    )
+                  }
+                  className="w-16 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                />
+                ms
+              </label>
               <button
                 type="button"
                 className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
