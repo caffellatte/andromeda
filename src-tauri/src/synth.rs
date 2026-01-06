@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tauri::State;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -83,13 +83,13 @@ impl Default for SynthState {
 }
 
 pub struct SynthEngine {
-    state: Mutex<SynthState>,
+    pub state: Arc<Mutex<SynthState>>,
 }
 
 impl Default for SynthEngine {
     fn default() -> Self {
         Self {
-            state: Mutex::new(SynthState::default()),
+            state: Arc::new(Mutex::new(SynthState::default())),
         }
     }
 }
