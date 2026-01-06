@@ -54,13 +54,13 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                             })
                             .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
-                        let feedback = 1.0 + resonance * 3.0;
+                        let feedback = (1.0 + resonance * 3.0).min(3.5);
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let raw = wave_value(&waveform, phase) * level;
                             let input = raw - z * (feedback - 1.0);
                             z = (1.0 - a) * input + a * z;
-                            let value = z * master * 0.25;
+                            let value = soft_clip(z * master * 0.35);
                             for sample in frame.iter_mut() {
                                 *sample = value;
                             }
@@ -93,13 +93,13 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                             })
                             .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
-                        let feedback = 1.0 + resonance * 3.0;
+                        let feedback = (1.0 + resonance * 3.0).min(3.5);
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let raw = wave_value(&waveform, phase) * level;
                             let input = raw - z * (feedback - 1.0);
                             z = (1.0 - a) * input + a * z;
-                            let value = z * master * 0.25;
+                            let value = soft_clip(z * master * 0.35);
                             let sample = i16::from_sample(value);
                             for out in frame.iter_mut() {
                                 *out = sample;
@@ -133,13 +133,13 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                             })
                             .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
-                        let feedback = 1.0 + resonance * 3.0;
+                        let feedback = (1.0 + resonance * 3.0).min(3.5);
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let raw = wave_value(&waveform, phase) * level;
                             let input = raw - z * (feedback - 1.0);
                             z = (1.0 - a) * input + a * z;
-                            let value = z * master * 0.25;
+                            let value = soft_clip(z * master * 0.35);
                             let sample = u16::from_sample(value);
                             for out in frame.iter_mut() {
                                 *out = sample;
@@ -170,6 +170,10 @@ fn wave_value(waveform: &str, phase: f32) -> f32 {
         "triangle" => 1.0 - 4.0 * (phase - 0.5).abs(),
         _ => (phase * 2.0 * PI).sin(),
     }
+}
+
+fn soft_clip(x: f32) -> f32 {
+    x / (1.0 + x.abs())
 }
 
 #[tauri::command]
