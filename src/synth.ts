@@ -54,6 +54,35 @@ export type RenderRequest = {
   events: AutomationEvent[];
 };
 
+export type Keyframe = {
+  time_ms: number;
+  value: number | string | boolean;
+  curve?: "step" | "linear";
+};
+
+export type AutomationTrack = {
+  path: string;
+  keyframes: Keyframe[];
+};
+
+export type Timeline = {
+  duration_ms: number;
+  tracks: AutomationTrack[];
+};
+
+export const flattenTimeline = (timeline: Timeline): AutomationEvent[] => {
+  return timeline.tracks
+    .flatMap((track) =>
+      track.keyframes.map((keyframe) => ({
+        time_ms: keyframe.time_ms,
+        path: track.path,
+        value: keyframe.value,
+        curve: keyframe.curve,
+      })),
+    )
+    .sort((a, b) => a.time_ms - b.time_ms);
+};
+
 export const getSynthState = () => invoke<SynthState>("synth_get_state");
 
 export const setSynthState = (state: SynthState) =>

@@ -8,11 +8,14 @@ import {
   Toggle,
 } from "./ui";
 import {
+  flattenTimeline,
   getSynthState,
   isAudioRunning,
+  renderSample,
   setSynthState,
   startAudio,
   stopAudio,
+  type Timeline,
 } from "./synth";
 import "./App.css";
 
@@ -41,6 +44,20 @@ function App() {
   });
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
+  const [timeline, setTimeline] = useState<Timeline>({
+    duration_ms: 3000,
+    tracks: [
+      {
+        path: "filter.cutoff",
+        keyframes: [
+          { time_ms: 0, value: 400, curve: "linear" },
+          { time_ms: 3000, value: 12000, curve: "linear" },
+        ],
+      },
+    ],
+  });
+  const [renderPath, setRenderPath] = useState<string | null>(null);
+  const [renderError, setRenderError] = useState<string | null>(null);
   const [debugState, setDebugState] = useState<string>("{}");
   const [debugPaused, setDebugPaused] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
@@ -380,6 +397,214 @@ function App() {
           <pre className="max-h-64 overflow-auto rounded-[var(--ui-radius-1)] bg-black/40 p-3 text-[0.65rem] text-zinc-300">
             {debugState}
           </pre>
+        </section>
+        <section className="rounded-[var(--ui-radius-2)] border border-white/10 bg-zinc-950/70 p-4">
+          <div className="mb-2 text-xs uppercase tracking-[0.3em] text-zinc-500">
+            Automation Timeline
+          </div>
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-zinc-500">
+            <label className="flex items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500">
+              Duration
+              <input
+                type="number"
+                min={500}
+                max={20000}
+                step={100}
+                value={timeline.duration_ms}
+                onChange={(e) =>
+                  setTimeline((prev) => ({
+                    ...prev,
+                    duration_ms: Math.min(
+                      20000,
+                      Math.max(500, Number(e.currentTarget.value) || 3000),
+                    ),
+                  }))
+                }
+                className="w-20 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+              />
+              ms
+            </label>
+            <button
+              type="button"
+              className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+              onClick={async () => {
+                setRenderError(null);
+                setRenderPath(null);
+                try {
+                  const events = flattenTimeline(timeline);
+                  const path = await renderSample({
+                    duration_ms: timeline.duration_ms,
+                    sample_rate: 44100,
+                    events,
+                  });
+                  setRenderPath(path);
+                } catch {
+                  setRenderError("Render failed.");
+                }
+              }}
+            >
+              Render Sample
+            </button>
+            {renderPath ? (
+              <span className="text-[0.6rem] text-amber-200/80">
+                {renderPath}
+              </span>
+            ) : null}
+            {renderError ? (
+              <span className="text-[0.6rem] text-red-300/80">
+                {renderError}
+              </span>
+            ) : null}
+          </div>
+          <div className="space-y-3">
+            {timeline.tracks.map((track, trackIndex) => (
+              <div
+                key={track.path}
+                className="rounded-[var(--ui-radius-1)] border border-white/5 bg-zinc-900/40 p-3"
+              >
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-400">
+                  <span>{track.path}</span>
+                  <button
+                    type="button"
+                    className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+                    onClick={() =>
+                      setTimeline((prev) => {
+                        const next = { ...prev };
+                        const nextTracks = [...next.tracks];
+                        const nextTrack = { ...nextTracks[trackIndex] };
+                        const nextKeyframes = [...nextTrack.keyframes];
+                        nextKeyframes.push({
+                          time_ms: Math.min(prev.duration_ms, 1000),
+                          value: 0,
+                          curve: "linear",
+                        });
+                        nextTrack.keyframes = nextKeyframes;
+                        nextTracks[trackIndex] = nextTrack;
+                        next.tracks = nextTracks;
+                        return next;
+                      })
+                    }
+                  >
+                    Add Keyframe
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {track.keyframes.map((keyframe, keyIndex) => (
+                    <div
+                      key={`${track.path}-${keyIndex}`}
+                      className="grid gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500 md:grid-cols-[1fr_1fr_1fr_auto]"
+                    >
+                      <label className="flex items-center gap-2">
+                        Time
+                        <input
+                          type="number"
+                          min={0}
+                          max={timeline.duration_ms}
+                          step={50}
+                          value={keyframe.time_ms}
+                          onChange={(e) =>
+                            setTimeline((prev) => {
+                              const next = { ...prev };
+                              const nextTracks = [...next.tracks];
+                              const nextTrack = { ...nextTracks[trackIndex] };
+                              const nextKeyframes = [...nextTrack.keyframes];
+                              const nextKeyframe = { ...nextKeyframes[keyIndex] };
+                              nextKeyframe.time_ms = Math.min(
+                                prev.duration_ms,
+                                Math.max(0, Number(e.currentTarget.value) || 0),
+                              );
+                              nextKeyframes[keyIndex] = nextKeyframe;
+                              nextTrack.keyframes = nextKeyframes;
+                              nextTracks[trackIndex] = nextTrack;
+                              next.tracks = nextTracks;
+                              return next;
+                            })
+                          }
+                          className="w-20 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                        />
+                      </label>
+                      <label className="flex items-center gap-2">
+                        Value
+                        <input
+                          type="number"
+                          step={1}
+                          value={
+                            typeof keyframe.value === "number"
+                              ? keyframe.value
+                              : 0
+                          }
+                          onChange={(e) =>
+                            setTimeline((prev) => {
+                              const next = { ...prev };
+                              const nextTracks = [...next.tracks];
+                              const nextTrack = { ...nextTracks[trackIndex] };
+                              const nextKeyframes = [...nextTrack.keyframes];
+                              const nextKeyframe = { ...nextKeyframes[keyIndex] };
+                              nextKeyframe.value = Number(
+                                e.currentTarget.value,
+                              );
+                              nextKeyframes[keyIndex] = nextKeyframe;
+                              nextTrack.keyframes = nextKeyframes;
+                              nextTracks[trackIndex] = nextTrack;
+                              next.tracks = nextTracks;
+                              return next;
+                            })
+                          }
+                          className="w-24 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                        />
+                      </label>
+                      <label className="flex items-center gap-2">
+                        Curve
+                        <select
+                          value={keyframe.curve ?? "step"}
+                          onChange={(e) =>
+                            setTimeline((prev) => {
+                              const next = { ...prev };
+                              const nextTracks = [...next.tracks];
+                              const nextTrack = { ...nextTracks[trackIndex] };
+                              const nextKeyframes = [...nextTrack.keyframes];
+                              const nextKeyframe = { ...nextKeyframes[keyIndex] };
+                              nextKeyframe.curve = e.currentTarget
+                                .value as "step" | "linear";
+                              nextKeyframes[keyIndex] = nextKeyframe;
+                              nextTrack.keyframes = nextKeyframes;
+                              nextTracks[trackIndex] = nextTrack;
+                              next.tracks = nextTracks;
+                              return next;
+                            })
+                          }
+                          className="w-24 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                        >
+                          <option value="step">Step</option>
+                          <option value="linear">Linear</option>
+                        </select>
+                      </label>
+                      <button
+                        type="button"
+                        className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-red-200"
+                        onClick={() =>
+                          setTimeline((prev) => {
+                            const next = { ...prev };
+                            const nextTracks = [...next.tracks];
+                            const nextTrack = { ...nextTracks[trackIndex] };
+                            const nextKeyframes = nextTrack.keyframes.filter(
+                              (_, index) => index !== keyIndex,
+                            );
+                            nextTrack.keyframes = nextKeyframes;
+                            nextTracks[trackIndex] = nextTrack;
+                            next.tracks = nextTracks;
+                            return next;
+                          })
+                        }
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
     </main>
