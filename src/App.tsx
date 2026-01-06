@@ -58,6 +58,26 @@ function App() {
   });
   const [renderPath, setRenderPath] = useState<string | null>(null);
   const [renderError, setRenderError] = useState<string | null>(null);
+  const [timelineJson, setTimelineJson] = useState<string>("");
+  const [timelineStatus, setTimelineStatus] = useState<string | null>(null);
+  const waveformPath = "oscillator.waveform";
+  const booleanPaths = new Set(["oscillator.sync", "global.mono"]);
+  const parameterOptions = [
+    "filter.cutoff",
+    "filter.resonance",
+    "mixer.master",
+    "oscillator.waveform",
+    "oscillator.tune",
+    "oscillator.level",
+    "oscillator.sync",
+    "global.mono",
+    "global.clip_amount",
+  ];
+  const getDefaultValue = (path: string) => {
+    if (path === waveformPath) return "sine";
+    if (booleanPaths.has(path)) return false;
+    return 0;
+  };
   const [debugState, setDebugState] = useState<string>("{}");
   const [debugPaused, setDebugPaused] = useState(false);
   const [isFocused, setIsFocused] = useState(true);
@@ -445,6 +465,21 @@ function App() {
             >
               Render Sample
             </button>
+            <button
+              type="button"
+              className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+              onClick={() =>
+                setTimeline((prev) => ({
+                  ...prev,
+                  tracks: [
+                    ...prev.tracks,
+                    { path: parameterOptions[0], keyframes: [] },
+                  ],
+                }))
+              }
+            >
+              Add Track
+            </button>
             {renderPath ? (
               <span className="text-[0.6rem] text-amber-200/80">
                 {renderPath}
@@ -463,7 +498,37 @@ function App() {
                 className="rounded-[var(--ui-radius-1)] border border-white/5 bg-zinc-900/40 p-3"
               >
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-400">
-                  <span>{track.path}</span>
+                  <label className="flex items-center gap-2">
+                    Path
+                    <select
+                      value={track.path}
+                      onChange={(e) =>
+                        setTimeline((prev) => {
+                          const next = { ...prev };
+                          const nextTracks = [...next.tracks];
+                          const nextTrack = { ...nextTracks[trackIndex] };
+                          const nextPath = e.currentTarget.value;
+                          nextTrack.path = nextPath;
+                          nextTrack.keyframes = nextTrack.keyframes.map(
+                            (keyframe) => ({
+                              ...keyframe,
+                              value: getDefaultValue(nextPath),
+                            }),
+                          );
+                          nextTracks[trackIndex] = nextTrack;
+                          next.tracks = nextTracks;
+                          return next;
+                        })
+                      }
+                      className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                    >
+                      {parameterOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <button
                     type="button"
                     className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
@@ -475,7 +540,7 @@ function App() {
                         const nextKeyframes = [...nextTrack.keyframes];
                         nextKeyframes.push({
                           time_ms: Math.min(prev.duration_ms, 1000),
-                          value: 0,
+                          value: getDefaultValue(nextTrack.path),
                           curve: "linear",
                         });
                         nextTrack.keyframes = nextKeyframes;
@@ -486,6 +551,20 @@ function App() {
                     }
                   >
                     Add Keyframe
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-red-200"
+                    onClick={() =>
+                      setTimeline((prev) => ({
+                        ...prev,
+                        tracks: prev.tracks.filter(
+                          (_, index) => index !== trackIndex,
+                        ),
+                      }))
+                    }
+                  >
+                    Remove Track
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -523,36 +602,103 @@ function App() {
                           className="w-20 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
                         />
                       </label>
-                      <label className="flex items-center gap-2">
-                        Value
-                        <input
-                          type="number"
-                          step={1}
-                          value={
-                            typeof keyframe.value === "number"
-                              ? keyframe.value
-                              : 0
-                          }
-                          onChange={(e) =>
-                            setTimeline((prev) => {
-                              const next = { ...prev };
-                              const nextTracks = [...next.tracks];
-                              const nextTrack = { ...nextTracks[trackIndex] };
-                              const nextKeyframes = [...nextTrack.keyframes];
-                              const nextKeyframe = { ...nextKeyframes[keyIndex] };
-                              nextKeyframe.value = Number(
-                                e.currentTarget.value,
-                              );
-                              nextKeyframes[keyIndex] = nextKeyframe;
-                              nextTrack.keyframes = nextKeyframes;
-                              nextTracks[trackIndex] = nextTrack;
-                              next.tracks = nextTracks;
-                              return next;
-                            })
-                          }
-                          className="w-24 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
-                        />
-                      </label>
+                      {track.path === waveformPath ? (
+                        <label className="flex items-center gap-2">
+                          Value
+                          <select
+                            value={
+                              typeof keyframe.value === "string"
+                                ? keyframe.value
+                                : "sine"
+                            }
+                            onChange={(e) =>
+                              setTimeline((prev) => {
+                                const next = { ...prev };
+                                const nextTracks = [...next.tracks];
+                                const nextTrack = { ...nextTracks[trackIndex] };
+                                const nextKeyframes = [...nextTrack.keyframes];
+                                const nextKeyframe = {
+                                  ...nextKeyframes[keyIndex],
+                                };
+                                nextKeyframe.value = e.currentTarget.value;
+                                nextKeyframes[keyIndex] = nextKeyframe;
+                                nextTrack.keyframes = nextKeyframes;
+                                nextTracks[trackIndex] = nextTrack;
+                                next.tracks = nextTracks;
+                                return next;
+                              })
+                            }
+                            className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                          >
+                            <option value="sine">sine</option>
+                            <option value="triangle">triangle</option>
+                            <option value="saw">saw</option>
+                            <option value="square">square</option>
+                          </select>
+                        </label>
+                      ) : booleanPaths.has(track.path) ? (
+                        <label className="flex items-center gap-2">
+                          Value
+                          <select
+                            value={keyframe.value ? "true" : "false"}
+                            onChange={(e) =>
+                              setTimeline((prev) => {
+                                const next = { ...prev };
+                                const nextTracks = [...next.tracks];
+                                const nextTrack = { ...nextTracks[trackIndex] };
+                                const nextKeyframes = [...nextTrack.keyframes];
+                                const nextKeyframe = {
+                                  ...nextKeyframes[keyIndex],
+                                };
+                                nextKeyframe.value =
+                                  e.currentTarget.value === "true";
+                                nextKeyframes[keyIndex] = nextKeyframe;
+                                nextTrack.keyframes = nextKeyframes;
+                                nextTracks[trackIndex] = nextTrack;
+                                next.tracks = nextTracks;
+                                return next;
+                              })
+                            }
+                            className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                          >
+                            <option value="true">true</option>
+                            <option value="false">false</option>
+                          </select>
+                        </label>
+                      ) : (
+                        <label className="flex items-center gap-2">
+                          Value
+                          <input
+                            type="number"
+                            step={1}
+                            value={
+                              typeof keyframe.value === "number"
+                                ? keyframe.value
+                                : 0
+                            }
+                            onChange={(e) =>
+                              setTimeline((prev) => {
+                                const next = { ...prev };
+                                const nextTracks = [...next.tracks];
+                                const nextTrack = { ...nextTracks[trackIndex] };
+                                const nextKeyframes = [...nextTrack.keyframes];
+                                const nextKeyframe = {
+                                  ...nextKeyframes[keyIndex],
+                                };
+                                nextKeyframe.value = Number(
+                                  e.currentTarget.value,
+                                );
+                                nextKeyframes[keyIndex] = nextKeyframe;
+                                nextTrack.keyframes = nextKeyframes;
+                                nextTracks[trackIndex] = nextTrack;
+                                next.tracks = nextTracks;
+                                return next;
+                              })
+                            }
+                            className="w-24 rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-200"
+                          />
+                        </label>
+                      )}
                       <label className="flex items-center gap-2">
                         Curve
                         <select
@@ -604,6 +750,50 @@ function App() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]">
+            <textarea
+              rows={4}
+              value={timelineJson}
+              onChange={(e) => setTimelineJson(e.currentTarget.value)}
+              placeholder="Paste timeline JSON to load or export current timeline."
+              className="w-full rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/70 p-3 text-[0.6rem] text-zinc-200"
+            />
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-3 py-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+                onClick={() => {
+                  setTimelineJson(JSON.stringify(timeline, null, 2));
+                  setTimelineStatus("Timeline exported to JSON.");
+                }}
+              >
+                Export JSON
+              </button>
+              <button
+                type="button"
+                className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-3 py-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100"
+                onClick={() => {
+                  try {
+                    const parsed = JSON.parse(timelineJson) as Timeline;
+                    if (!parsed || !Array.isArray(parsed.tracks)) {
+                      throw new Error("Invalid timeline.");
+                    }
+                    setTimeline(parsed);
+                    setTimelineStatus("Timeline loaded.");
+                  } catch {
+                    setTimelineStatus("Invalid JSON.");
+                  }
+                }}
+              >
+                Load JSON
+              </button>
+              {timelineStatus ? (
+                <span className="text-[0.6rem] text-zinc-500">
+                  {timelineStatus}
+                </span>
+              ) : null}
+            </div>
           </div>
         </section>
       </div>
