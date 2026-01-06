@@ -41,7 +41,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [f32], _| {
-                        let (freq, waveform, level, master, cutoff, resonance) = state
+                        let (freq, waveform, level, master, cutoff, resonance, clip_amount) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
@@ -50,9 +50,10 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                                 let master = s.mixer.master.max(0.0).min(1.0);
                                 let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
                                 let resonance = s.filter.resonance.max(0.0).min(1.0);
-                                (freq, waveform, level, master, cutoff, resonance)
+                                let clip_amount = s.global.clip_amount.max(0.05).min(1.0);
+                                (freq, waveform, level, master, cutoff, resonance, clip_amount)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0, 0.35));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
                         let feedback = (1.0 + resonance * 3.0).min(3.5);
                         for frame in data.chunks_mut(channels) {
@@ -60,7 +61,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                             let raw = wave_value(&waveform, phase) * level;
                             let input = raw - z * (feedback - 1.0);
                             z = (1.0 - a) * input + a * z;
-                            let value = soft_clip(z * master * 0.35);
+                            let value = soft_clip(z * master * clip_amount);
                             for sample in frame.iter_mut() {
                                 *sample = value;
                             }
@@ -80,7 +81,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [i16], _| {
-                        let (freq, waveform, level, master, cutoff, resonance) = state
+                        let (freq, waveform, level, master, cutoff, resonance, clip_amount) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
@@ -89,9 +90,10 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                                 let master = s.mixer.master.max(0.0).min(1.0);
                                 let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
                                 let resonance = s.filter.resonance.max(0.0).min(1.0);
-                                (freq, waveform, level, master, cutoff, resonance)
+                                let clip_amount = s.global.clip_amount.max(0.05).min(1.0);
+                                (freq, waveform, level, master, cutoff, resonance, clip_amount)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0, 0.35));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
                         let feedback = (1.0 + resonance * 3.0).min(3.5);
                         for frame in data.chunks_mut(channels) {
@@ -99,7 +101,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                             let raw = wave_value(&waveform, phase) * level;
                             let input = raw - z * (feedback - 1.0);
                             z = (1.0 - a) * input + a * z;
-                            let value = soft_clip(z * master * 0.35);
+                            let value = soft_clip(z * master * clip_amount);
                             let sample = i16::from_sample(value);
                             for out in frame.iter_mut() {
                                 *out = sample;
@@ -120,7 +122,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [u16], _| {
-                        let (freq, waveform, level, master, cutoff, resonance) = state
+                        let (freq, waveform, level, master, cutoff, resonance, clip_amount) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
@@ -129,9 +131,10 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                                 let master = s.mixer.master.max(0.0).min(1.0);
                                 let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
                                 let resonance = s.filter.resonance.max(0.0).min(1.0);
-                                (freq, waveform, level, master, cutoff, resonance)
+                                let clip_amount = s.global.clip_amount.max(0.05).min(1.0);
+                                (freq, waveform, level, master, cutoff, resonance, clip_amount)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0, 0.35));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
                         let feedback = (1.0 + resonance * 3.0).min(3.5);
                         for frame in data.chunks_mut(channels) {
@@ -139,7 +142,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                             let raw = wave_value(&waveform, phase) * level;
                             let input = raw - z * (feedback - 1.0);
                             z = (1.0 - a) * input + a * z;
-                            let value = soft_clip(z * master * 0.35);
+                            let value = soft_clip(z * master * clip_amount);
                             let sample = u16::from_sample(value);
                             for out in frame.iter_mut() {
                                 *out = sample;

@@ -30,6 +30,7 @@ export type MixerState = {
 export type GlobalState = {
   mono: boolean;
   glide: number;
+  clip_amount: number;
 };
 
 export type SynthState = {

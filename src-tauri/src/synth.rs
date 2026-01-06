@@ -37,6 +37,7 @@ pub struct Mixer {
 pub struct Global {
     pub mono: bool,
     pub glide: f32,
+    pub clip_amount: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,6 +78,7 @@ impl Default for SynthState {
             global: Global {
                 mono: false,
                 glide: 0.05,
+                clip_amount: 0.35,
             },
         }
     }

@@ -33,6 +33,7 @@ function App() {
   const [master, setMaster] = useState(0.72);
   const [mono, setMono] = useState(false);
   const [sync, setSync] = useState(true);
+  const [clipAmount, setClipAmount] = useState(0.35);
   const [osc, setOsc] = useState({
     waveform: "saw",
     tune: 0,
@@ -68,6 +69,7 @@ function App() {
       global: {
         mono,
         glide,
+        clip_amount: clipAmount,
       },
     });
   }, [
@@ -83,6 +85,7 @@ function App() {
     master,
     mono,
     glide,
+    clipAmount,
   ]);
 
   useEffect(() => {
@@ -226,6 +229,17 @@ function App() {
                   value={drive}
                   onChange={setDrive}
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-[var(--ui-space-4)]">
+                <Knob
+                  label="Clip"
+                  min={0.05}
+                  max={1}
+                  step={0.01}
+                  value={clipAmount}
+                  onChange={setClipAmount}
+                />
+                <div />
               </div>
             </div>
 
