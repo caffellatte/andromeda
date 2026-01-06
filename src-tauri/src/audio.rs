@@ -41,7 +41,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [f32], _| {
-                        let (freq, waveform, level, master, cutoff) = state
+                        let (freq, waveform, level, master, cutoff, resonance) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
@@ -49,14 +49,17 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                                 let level = s.oscillator.level.max(0.0).min(1.0);
                                 let master = s.mixer.master.max(0.0).min(1.0);
                                 let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
-                                (freq, waveform, level, master, cutoff)
+                                let resonance = s.filter.resonance.max(0.0).min(1.0);
+                                (freq, waveform, level, master, cutoff, resonance)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
+                        let feedback = 1.0 + resonance * 3.0;
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let raw = wave_value(&waveform, phase) * level;
-                            z = (1.0 - a) * raw + a * z;
+                            let input = raw - z * (feedback - 1.0);
+                            z = (1.0 - a) * input + a * z;
                             let value = z * master * 0.25;
                             for sample in frame.iter_mut() {
                                 *sample = value;
@@ -77,7 +80,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [i16], _| {
-                        let (freq, waveform, level, master, cutoff) = state
+                        let (freq, waveform, level, master, cutoff, resonance) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
@@ -85,14 +88,17 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                                 let level = s.oscillator.level.max(0.0).min(1.0);
                                 let master = s.mixer.master.max(0.0).min(1.0);
                                 let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
-                                (freq, waveform, level, master, cutoff)
+                                let resonance = s.filter.resonance.max(0.0).min(1.0);
+                                (freq, waveform, level, master, cutoff, resonance)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
+                        let feedback = 1.0 + resonance * 3.0;
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let raw = wave_value(&waveform, phase) * level;
-                            z = (1.0 - a) * raw + a * z;
+                            let input = raw - z * (feedback - 1.0);
+                            z = (1.0 - a) * input + a * z;
                             let value = z * master * 0.25;
                             let sample = i16::from_sample(value);
                             for out in frame.iter_mut() {
@@ -114,7 +120,7 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                 .build_output_stream(
                     &cfg,
                     move |data: &mut [u16], _| {
-                        let (freq, waveform, level, master, cutoff) = state
+                        let (freq, waveform, level, master, cutoff, resonance) = state
                             .lock()
                             .map(|s| {
                                 let freq = 220.0 * 2.0f32.powf(s.oscillator.tune / 12.0);
@@ -122,14 +128,17 @@ fn build_stream_with_state(state: Arc<Mutex<crate::synth::SynthState>>) -> Resul
                                 let level = s.oscillator.level.max(0.0).min(1.0);
                                 let master = s.mixer.master.max(0.0).min(1.0);
                                 let cutoff = s.filter.cutoff.max(20.0).min(20000.0);
-                                (freq, waveform, level, master, cutoff)
+                                let resonance = s.filter.resonance.max(0.0).min(1.0);
+                                (freq, waveform, level, master, cutoff, resonance)
                             })
-                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0));
+                            .unwrap_or((220.0, "sine".into(), 0.2, 0.7, 12000.0, 0.0));
                         let a = (-2.0 * PI * cutoff / sample_rate).exp();
+                        let feedback = 1.0 + resonance * 3.0;
                         for frame in data.chunks_mut(channels) {
                             phase = (phase + freq / sample_rate) % 1.0;
                             let raw = wave_value(&waveform, phase) * level;
-                            z = (1.0 - a) * raw + a * z;
+                            let input = raw - z * (feedback - 1.0);
+                            z = (1.0 - a) * input + a * z;
                             let value = z * master * 0.25;
                             let sample = u16::from_sample(value);
                             for out in frame.iter_mut() {
