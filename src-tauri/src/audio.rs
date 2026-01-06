@@ -24,15 +24,16 @@ fn build_stream() -> Result<Stream, String> {
     let config = device
         .default_output_config()
         .map_err(|e| format!("output config error: {e}"))?;
-    let sample_rate = config.sample_rate().0 as f32;
-    let channels = config.channels() as usize;
+    let stream_config: cpal::StreamConfig = config.clone().into();
+    let sample_rate = stream_config.sample_rate as f32;
+    let channels = stream_config.channels as usize;
     let err_fn = |err| eprintln!("audio stream error: {err}");
     let freq = 220.0;
     let amplitude = 0.2;
 
     let stream = match config.sample_format() {
         SampleFormat::F32 => {
-            let cfg = config.clone().into();
+            let cfg = stream_config.clone();
             let mut phase = 0.0f32;
             device
                 .build_output_stream(
@@ -52,7 +53,7 @@ fn build_stream() -> Result<Stream, String> {
                 .map_err(|e| format!("stream build error: {e}"))?
         }
         SampleFormat::I16 => {
-            let cfg = config.clone().into();
+            let cfg = stream_config.clone();
             let mut phase = 0.0f32;
             device
                 .build_output_stream(
@@ -73,7 +74,7 @@ fn build_stream() -> Result<Stream, String> {
                 .map_err(|e| format!("stream build error: {e}"))?
         }
         SampleFormat::U16 => {
-            let cfg = config.clone().into();
+            let cfg = stream_config.clone();
             let mut phase = 0.0f32;
             device
                 .build_output_stream(
