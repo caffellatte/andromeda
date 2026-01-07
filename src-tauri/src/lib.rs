@@ -1,9 +1,11 @@
 mod audio;
+mod ai;
 mod automation;
 mod render;
 mod synth;
 
 use audio::{audio_is_running, audio_start, audio_stop, AudioEngine};
+use ai::ai_generate_automation;
 use render::render_sample;
 use synth::{synth_get_state, synth_reset, synth_set_state, SynthEngine};
 
@@ -20,7 +22,8 @@ pub fn run() {
             audio_start,
             audio_stop,
             audio_is_running,
-            render_sample
+            render_sample,
+            ai_generate_automation
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

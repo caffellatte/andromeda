@@ -10,12 +10,14 @@ import {
 import {
   flattenTimeline,
   getSynthState,
+  generateAutomation,
   isAudioRunning,
   renderSample,
   setSynthState,
   startAudio,
   stopAudio,
   type Timeline,
+  eventsToTimeline,
 } from "./synth";
 import "./App.css";
 
@@ -60,6 +62,11 @@ function App() {
   const [renderError, setRenderError] = useState<string | null>(null);
   const [timelineJson, setTimelineJson] = useState<string>("");
   const [timelineStatus, setTimelineStatus] = useState<string | null>(null);
+  const [aiPrompt, setAiPrompt] = useState(
+    "Bright evolving pad with a slow cutoff sweep and subtle resonance.",
+  );
+  const [aiStatus, setAiStatus] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
   const waveformPath = "oscillator.waveform";
   const booleanPaths = new Set(["oscillator.sync", "global.mono"]);
   const parameterOptions = [
@@ -488,6 +495,43 @@ function App() {
                 {renderError}
               </span>
             ) : null}
+          </div>
+          <div className="mb-4 rounded-[var(--ui-radius-1)] border border-white/5 bg-zinc-900/40 p-3">
+            <div className="mb-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-400">
+              AI Automation
+            </div>
+            <textarea
+              rows={2}
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.currentTarget.value)}
+              className="w-full rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/70 p-2 text-[0.7rem] text-zinc-200"
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[0.6rem] uppercase tracking-[0.2em] text-zinc-500">
+              <button
+                type="button"
+                className="rounded-[var(--ui-radius-1)] border border-white/10 bg-zinc-900/80 px-2 py-1 text-[0.55rem] uppercase tracking-[0.2em] text-zinc-300 transition hover:text-amber-100 disabled:opacity-50"
+                disabled={aiBusy}
+                onClick={async () => {
+                  setAiStatus(null);
+                  setAiBusy(true);
+                  try {
+                    const events = await generateAutomation({
+                      prompt: aiPrompt,
+                      duration_ms: timeline.duration_ms,
+                    });
+                    setTimeline(eventsToTimeline(events, timeline.duration_ms));
+                    setAiStatus("AI automation loaded.");
+                  } catch {
+                    setAiStatus("AI automation failed.");
+                  } finally {
+                    setAiBusy(false);
+                  }
+                }}
+              >
+                {aiBusy ? "Generating..." : "Generate"}
+              </button>
+              {aiStatus ? <span>{aiStatus}</span> : null}
+            </div>
           </div>
           <div className="space-y-3">
             {timeline.tracks.map((track, trackIndex) => (

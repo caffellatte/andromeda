@@ -83,6 +83,30 @@ export const flattenTimeline = (timeline: Timeline): AutomationEvent[] => {
     .sort((a, b) => a.time_ms - b.time_ms);
 };
 
+export const eventsToTimeline = (
+  events: AutomationEvent[],
+  duration_ms: number,
+): Timeline => {
+  const tracks = new Map<string, AutomationTrack>();
+  for (const event of events) {
+    if (!tracks.has(event.path)) {
+      tracks.set(event.path, { path: event.path, keyframes: [] });
+    }
+    tracks.get(event.path)?.keyframes.push({
+      time_ms: event.time_ms,
+      value: event.value,
+      curve: event.curve,
+    });
+  }
+  return {
+    duration_ms,
+    tracks: Array.from(tracks.values()).map((track) => ({
+      ...track,
+      keyframes: track.keyframes.sort((a, b) => a.time_ms - b.time_ms),
+    })),
+  };
+};
+
 export const getSynthState = () => invoke<SynthState>("synth_get_state");
 
 export const setSynthState = (state: SynthState) =>
@@ -98,3 +122,8 @@ export const isAudioRunning = () => invoke<boolean>("audio_is_running");
 
 export const renderSample = (request: RenderRequest) =>
   invoke<string>("render_sample", { request });
+
+export const generateAutomation = (request: {
+  prompt: string;
+  duration_ms: number;
+}) => invoke<AutomationEvent[]>("ai_generate_automation", { request });
